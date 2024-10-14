@@ -1,0 +1,16 @@
+.dias-container {
+    display: flex;
+    height: 100%;
+    gap: 5px;
+  }
+  button {
+    padding: 0px 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: lightgray;
+    cursor: pointer;
+  }
+  button.active {
+    background-color: rgb(46, 120, 101);
+    color: white;
+  }

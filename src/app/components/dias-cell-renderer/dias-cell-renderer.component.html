@@ -1,0 +1,8 @@
+<div class="dias-container items-center justify-center">
+    <button *ngFor="let dia of diasMap; let i = index" 
+            style="line-height: 2"
+            [ngClass]="{'active': dias[i] === 1}" 
+            (click)="toggleDia(i)">
+      {{ dia }}
+    </button>
+  </div>
