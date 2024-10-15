@@ -1,0 +1,48 @@
+<div class="h-screen pt-10">
+    <form [formGroup]="loginForm" (ngSubmit)="login()" class="max-w-md mx-auto p-4 bg-white rounded-lg shadow-xl">
+      <img
+        style="width: auto; height: 100px; margin: auto;"
+        src="../../../../assets/img/Logo-Shell1.png">
+      <h1 class="text-xl text-center mb-4 font-semibold">¡Bienvenido!</h1>
+
+      <div class="flex items-center relative border border-gray-300 rounded-lg overflow-hidden mb-3">
+        <i class="material-symbols-outlined absolute left-0 ml-3">account_circle</i>
+        <input
+          id="user"
+          type="text"
+          placeholder="Usuario"
+          formControlName="username"
+          class="pl-10 pr-3 py-2 w-full focus:outline-none focus:ring focus:border-blue-300"
+        />
+      </div>
+
+      <div class="flex items-center relative border border-gray-300 rounded-lg overflow-hidden mb-3">
+        <i class="material-symbols-outlined absolute left-0 ml-3">lock</i>
+        <input
+          id="pass"
+          [type]="hidePassword ? 'password' : 'text'"
+          formControlName="password"
+          placeholder="Contraseña"
+          class="pl-10 pr-3 py-2 w-full focus:outline-none focus:ring focus:border-blue-300"
+        />
+        <button
+          type="button"
+          class="absolute right-0 mr-3 mt-2"
+          (click)="togglePasswordVisibility()">
+          <i *ngIf="!hidePassword" class="material-symbols-outlined">visibility</i>
+          <i *ngIf="hidePassword" class="material-symbols-outlined">visibility_off</i>
+        </button>
+      </div>
+
+      <div class="flex justify-center space-x-2">
+        <button
+          type="submit"
+          [disabled]="loginForm.invalid"
+          class="text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+          [ngClass]="{'bg-gradient-to-r from-lime-800 to-green-800 hover:bg-gradient-to-br shadow-lg focus:ring-4 focus:outline-none focus:ring-violet-300 dark:focus:ring-lime-800 shadow-lime-500/50 dark:shadow-lg dark:shadow-green-800/80': !loginForm.invalid,
+                      'bg-gray-300':loginForm.invalid}">
+          Iniciar sesión
+        </button>
+      </div>
+    </form>
+  </div>
