@@ -3,16 +3,13 @@
       <div class="flex justify-between items-start ">
         <h1 class="text-4xl font-medium">Premios</h1>
       </div>
-  
-      <div class="flex justify-between"> 
-        <div class="flex justify-end gap-4">
+      <div class="flex justify-end">
           <button
             (click)="showModal=true"
-            class="bg-verde-boton hover:bg-verde-boton-hover text-white text-base font-bold py-1 px-4 focus:ring-2 focus:ring-verde-claro focus:outline-none rounded">
+            class="add-button text-white text-base font-bold py-1 px-4 focus:ring-2 focus:ring-white focus:outline-none rounded">
             Agregar
           </button>
         </div>
-      </div>
       <div class="grid">
         <ag-grid-angular
           class="ag-theme-quartz"
@@ -32,3 +29,5 @@
       </div>
     </div>
   </main>
+
+  <app-modal *ngIf="showModal" (formSubmit)="handleFormSubmit($event)" (close)="closeModal()"></app-modal>

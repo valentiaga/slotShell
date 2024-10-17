@@ -16,6 +16,7 @@ import {
 } from 'ag-grid-community';
 import { HttpClientModule } from '@angular/common/http';
 import { DiasCellRendererComponent } from '../../components/dias-cell-renderer/dias-cell-renderer.component';
+import { ModalComponent } from '../../components/modal/modal.component';
 
 @Component({
   selector: 'app-admin-page',
@@ -29,6 +30,7 @@ import { DiasCellRendererComponent } from '../../components/dias-cell-renderer/d
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
+    ModalComponent
   ],
   templateUrl: './admin-page.component.html',
   styleUrl: './admin-page.component.css'

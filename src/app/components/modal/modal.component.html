@@ -1,0 +1,89 @@
+<!-- modal.component.html -->
+<div class="fixed inset-0 z-50 overflow-auto flex items-center justify-center bg-black bg-opacity-50">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <div class="relative bg-gris rounded-lg shadow dark:bg-white">
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-700">
+                    Nuevo premio
+                </h3>
+                <!-- <label *ngIf="content.toggle" class="inline-flex items-center cursor-pointer" >
+                    <input type="checkbox" value="" class="sr-only peer" [(ngModel)]="isToggled">
+                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-green-500 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
+                    <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">{{content.toggle}}</span>
+                </label> -->
+            </div>
+            <div class="p-4 md:p-5">
+                <form class="space-y-4" (ngSubmit)="onSubmit(form)" #form="ngForm">
+                    <div class="flex flex-col">
+                        <label for="nombre"
+                                class="block mb-2 w-full text-sm font-medium text-gray-900 dark:text-gray-700">Nombre</label>
+                        <input
+                            type="string"
+                            name="nombre"
+                            [(ngModel)]="formData['nombre']"
+                            id="nombre"
+                            class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+                        
+                            <label for="display"
+                            class="block mb-2 w-full text-sm font-medium text-gray-900 dark:text-gray-700">Display</label>
+                            <input
+                                type="string"
+                                name="display"
+                                [(ngModel)]="formData['display']"
+                                id="display"
+                                class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 ">
+                       
+                            <div class="flex-grow mr-4">
+                                <label for="desde"
+                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-700">Desde</label>
+                                <input
+                                    type="time"
+                                    name="desde"
+                                    [(ngModel)]="formData['desde']"
+                                    id="desde"
+                                    class="bg-gray-50 border border-gray-300  text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+                                
+                                <label for="hasta"
+                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-700">Hasta</label>
+                                <input
+                                    type="time"
+                                    name="hasta"
+                                    [(ngModel)]="formData['hasta']"
+                                    id="hasta"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+                            </div>
+                                <!-- <div class="flex-grow mr-4">
+                            <select
+                                *ngIf="option.hasDropdown"
+                                [name]="option.value"
+                                [(ngModel)]="formData[option.value]"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                required>
+                                <option value="" disabled selected></option>
+                                <option *ngFor="let item of option.dropdown" [value]="item.value">{{item.title}}</option>
+                            </select>
+                        </div> -->
+                    </div>
+                    <div class="flex justify-end mb-4">
+                        <button
+                            *ngIf="showFormulaButton"
+                            [ngClass]="{'bg-verde-boton-hover': disableAddFormulaButton()}"
+                            [disabled]="disableAddFormulaButton()" class="text-white bg-verde-boton hover:bg-verde-boton-hover focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
+                            (click)="onAddFormula()">Añadir Fórmula
+                        </button>
+                        <button
+                            class="text-gray-700 bg-gray-300 hover:bg-gray-400 focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm px-5 py-2.5 mx-2"
+                            (click)="onClose()">Cancelar
+                        </button>
+                        <button
+                            *ngIf="!showFormulaButton"
+                            type="submit"
+                            class="text-white bg-verde-boton hover:bg-verde-boton-hover focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
+                            >Agregar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
