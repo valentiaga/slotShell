@@ -1,5 +1,5 @@
 import { NgClass, NgFor } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-dias-cell-renderer',
@@ -9,13 +9,19 @@ import { Component } from '@angular/core';
   styleUrl: './dias-cell-renderer.component.css'
 })
 export class DiasCellRendererComponent {
+  @Input() diasModal: number[] = [];
   public dias: number[] = [];
   public diasMap = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
   agInit(params: any): void {
     this.dias = params.data.dias;
   }
-
+  
+  ngOnInit(): void {
+    if (this.diasModal.length > 0) {
+      this.dias = this.diasModal;
+    }
+  }
   toggleDia(index: number) {
     this.dias[index] = this.dias[index] === 1 ? 0 : 1;
   }
