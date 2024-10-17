@@ -55,6 +55,7 @@ export class AdminPageComponent {
     {
       id_premio: 1,
       identificacion: 'Premio A',
+      monto: 10000,
       display: '10k',
       is_activo: true,
       hora_inicio: '08:00',
@@ -64,6 +65,7 @@ export class AdminPageComponent {
     {
       id_premio: 2,
       identificacion: 'Premio B',
+      monto: 20000,
       display: '20k',
       is_activo: false,
       hora_inicio: '09:00',
@@ -74,6 +76,7 @@ export class AdminPageComponent {
       id_premio: 3,
       identificacion: 'Premio C',
       is_activo: true,
+      monto: 10000,
       display: '100k',
       hora_inicio: '10:00',
       hora_fin: '12:00',
@@ -99,6 +102,16 @@ export class AdminPageComponent {
       editable: true,
       filter: "agTextColumnFilter",
       floatingFilter: this.displayFilterRow,
+    },
+    {
+      headerName: 'Monto',
+      field: 'monto',
+      flex: 1,
+      minWidth: 150,
+      editable: true,
+      filter: "agNumberColumnFilter",
+      floatingFilter: this.displayFilterRow,
+      cellRenderer: (params: any) => `$ ${params.value}`    
     },
     {
       headerName: 'Display',

@@ -2,39 +2,34 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ModalContent } from '../../interfaces/modal';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DiasCellRendererComponent } from '../dias-cell-renderer/dias-cell-renderer.component';
 
 @Component({
   selector: 'app-modal',
   standalone: true,
-  imports: [NgIf, NgClass, NgFor, FormsModule],
+  imports: [NgIf, NgClass, NgFor, FormsModule, DiasCellRendererComponent],
   templateUrl: './modal.component.html',
   styleUrl: './modal.component.css'
 })
 export class ModalComponent {
   @Input() showFormulaButton: boolean = false;
-
+  isChecked = true;
   @Output() close = new EventEmitter();
   @Output() formSubmit = new EventEmitter<any>();
   @Output() addFormula = new EventEmitter<any>();
   formData: { [key: string]: any } = {};
   @Input() isToggled: boolean = false;
+  showFileInput = false;
+  displayDisabled = false;
+
+  toggleFileInput() {
+    this.showFileInput = !this.showFileInput;
+    this.displayDisabled = !this.displayDisabled;
+  }
 
   onSubmit(form: any) {
     console.log(this.formData);
     this.formSubmit.emit(this.formData);
-  }
-
-  disableAddFormulaButton() {
-    // const campo = MODAL_ESTRUCTURA.PRODUCTO.rows[0].options[0].value;
-    return false;
-  }
-
-  onAddFormula() {
-    console.log(
-      '🚀 ~ ModalComponent ~ onAddFormula ~ this.formData:',
-      this.formData
-    );
-    this.addFormula.emit(this.formData);
   }
 
   onClose() {
@@ -45,14 +40,4 @@ export class ModalComponent {
     const inputElement = event.target as HTMLInputElement;
     this.formData[key] = inputElement.checked;
   }
-
-  // ngOnInit(): void {
-  //   this.content.rows.forEach((row) => {
-  //     row.options.forEach((option) => {
-  //       if (option.preset) {
-  //         this.formData[option.value] = option.preset;
-  //       }
-  //     });
-  //   });
-  // }
 }
