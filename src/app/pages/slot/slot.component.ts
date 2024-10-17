@@ -7,11 +7,12 @@ import {
 } from '@angular/core';
 import { SymbolsService } from '../../services/symbols.service';
 import { ReelComponent } from '../../components/reel/reel.component';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-slot',
   standalone: true,
-  imports: [NgFor, ReelComponent, NgStyle],
+  imports: [NgFor, ReelComponent, NgStyle, RouterOutlet],
   templateUrl: './slot.component.html',
   styleUrls: ['./slot.component.css'],
   changeDetection: ChangeDetectionStrategy.Default,
