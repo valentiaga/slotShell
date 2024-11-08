@@ -31,9 +31,13 @@ export class PremiosService {
   }
 
   postPremio(idEmpresa: number, nuevoPremio: Premio): Observable<any>{
-    console.log("🚀 ~ PremiosService ~ postPremio ~ nuevoPremio:", nuevoPremio);
     const url = `${this.baseUrl}/prizes`;
     return this.http.post<any>(url, nuevoPremio);
+  }
+
+  putPrize(idEmpresa: number, prize: Premio): Observable<any>{
+    const url = `${this.baseUrl}/prizes`;
+    return this.http.put<any>(url, prize);
   }
 
   getPremio(idEmpresa: number, id_prize: number): Observable<Premio>{

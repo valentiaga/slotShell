@@ -16,7 +16,6 @@ export class DiasCellRendererComponent {
   public diasMap = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
   agInit(params: any): void {
-    console.log("🚀 ~ DiasCellRendererComponent ~ agInit ~ this.dias:", params.data.active_days)
     this.dias = this.daysToArray(params.data.active_days);
   }
 
@@ -27,7 +26,6 @@ export class DiasCellRendererComponent {
   }
 
   daysToArray(diasStr: string): number[] {
-    // console.log("🚀 ~ DiasCellRendererComponent ~ daysToArray ~", diasStr.split('').map(char => parseInt(char, 10)))
     return diasStr.split('').map(char => parseInt(char, 10));
   }
 

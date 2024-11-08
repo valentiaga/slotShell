@@ -205,7 +205,16 @@ export class AdminPageComponent {
   }
 
   onCellValueChanged(event: CellValueChangedEvent) {
-    //tambien necesitamos servicio
+    this.premiosService.putPrize(this.idEmpresa, event.data).subscribe({
+      next: (response) => {
+        this.premiosService.clearCache();
+        console.log('Agregado con exito!', response)
+        this.loadData();
+      },
+      error: (error) => {
+        console.error('Error al agregar el premio:', error);
+      }
+    });
   }
 
   deleteRow = (rowId: number) => {
