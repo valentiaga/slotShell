@@ -22,7 +22,7 @@ export class HeaderComponent {
     // this.authService.logout()
   }
 
-  isLogged(): any {
-    return this.router.url !== '/login';
+  isAdminPage(): any {    
+    return this.router.url === '/panel';
   }
 }
