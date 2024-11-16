@@ -88,6 +88,15 @@ export class AdminPageComponent {
       floatingFilter: this.displayFilterRow,
     },
     {
+      headerName: 'Contador',
+      field: 'spins',
+      flex: 1,
+      minWidth: 150,
+      editable: true,
+      filter: "agNumberColumnFilter",
+      floatingFilter: this.displayFilterRow,
+    },
+    {
       headerName: 'Activo?',
       field: 'is_active',
       flex: 1,
