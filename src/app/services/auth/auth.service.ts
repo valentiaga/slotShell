@@ -55,6 +55,8 @@ export class AuthService {
   }
 
   checkAuthStatus(): Observable<boolean> {
+    if(this.router.url === '/')
+      return of(false)
     const url = `${this.baseUrl}/auth/check-token`
     const _token = localStorage.getItem('token')
     if (!_token) {
