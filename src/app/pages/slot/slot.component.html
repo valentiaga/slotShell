@@ -2,16 +2,19 @@
   <div class="absolute inset-0 z-0">
     <img src="../../../assets/img/EspacioShell.jpg" alt="Background Image" class="w-screen h-screen object-cover" />
   </div>
-  <section class="w-full flex items-center justify-center gap-6 z-10 relative mb-20" style="height: 47%">
+  <section class="w-full flex items-center justify-center gap-6 z-10 relative" style="height: 45%; margin-bottom: 8rem;">
     <app-reel
       class="flex items-center justify-center h-2/3 w-1/6 relative overflow-hidden"
       *ngFor="let symbol of randomSymbols; let i = index"
       [duration]="getDuration(i)"
+      [index]="i"
       [targetSymbol]="targetSymbol"
       (stop)="onReelStop(i)"
       [ngStyle]="getSlotStyle(i)"
+      [ngClass]="'small-symbol'" 
     ></app-reel>
   </section>
+  
 
   <button
     (click)="generateRandomSymbols()"
