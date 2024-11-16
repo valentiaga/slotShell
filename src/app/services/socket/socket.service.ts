@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { fromEvent, Observable } from 'rxjs';
+import { environments } from '../../../assets/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -9,11 +10,12 @@ export class SocketService {
 
   private socket: Socket | undefined;
   private socketIP: Socket;
-  private raspberryIp: string = '192.168.100.88';
+  private raspberryIp: string = '';
+  private readonly baseUrl: string = environments.BASE_URL
 
   constructor() {
     // Conexión al backend
-    this.socketIP = io('http://192.168.100.88:5050'); 
+    this.socketIP = io(`${this.baseUrl}:3000`); 
     this.connectToRaspberryPi();
 
     // Eventos del backend
@@ -27,8 +29,8 @@ export class SocketService {
 
     // Escuchar cambios de IP desde el backend
     this.onIpUpdated().subscribe((data) => {
-      console.log(`Nueva IP de la Raspberry Pi recibida: ${data.ip}`);
-      this.reconnectToRaspberryPi(data.ip);
+      console.log(`Nueva IP de la Raspberry Pi recibida: ${data.ip_address}`);
+      this.reconnectToRaspberryPi(data.ip_address);
     });
   }
 
@@ -53,7 +55,6 @@ export class SocketService {
 
     this.raspberryIp = newIp;
     this.connectToRaspberryPi();
-    console.log('Reconectado a la nueva IP de la Raspberry Pi');
   }
 
   toggleLed() {
@@ -69,7 +70,7 @@ export class SocketService {
     });
   }
 
-  onIpUpdated(): Observable<{ ip: string }> {
-    return fromEvent<{ ip: string }>(this.socketIP, 'ip_updated');
+  onIpUpdated(): Observable<{ ip_address: string }> {
+    return fromEvent<{ ip_address: string }>(this.socketIP, 'ip_updated');
   }
 }
