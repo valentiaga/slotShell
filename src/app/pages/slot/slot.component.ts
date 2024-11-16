@@ -2,12 +2,14 @@ import { NgFor, NgStyle } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   QueryList,
   ViewChildren,
 } from '@angular/core';
 import { SymbolsService } from '../../services/symbols.service';
 import { ReelComponent } from '../../components/reel/reel.component';
 import { RouterOutlet } from '@angular/router';
+import { SocketService } from '../../services/socket/socket.service';
 
 @Component({
   selector: 'app-slot',
@@ -25,6 +27,8 @@ export class SlotComponent {
   targetSymbol?: string | null;
   back?: HTMLAudioElement;
   win?: HTMLAudioElement;
+  socketService = inject(SocketService);
+  estacion: string = '';
 
   constructor(private symbolsService: SymbolsService) {}
 
@@ -32,6 +36,23 @@ export class SlotComponent {
     this.back = document.getElementById('audio_back') as HTMLAudioElement;
     this.win = document.getElementById('audio_win') as HTMLAudioElement;
     this.initialRandomSymbols();
+    this.socketService.onPinChange().subscribe(data => {
+      console.log('Cambia el pin!', data); 
+      if (data.state === "HIGH"){
+        this.generateRandomSymbols()
+      }
+      switch(data.pin){
+        case 13:
+          this.estacion = 'Estacion 1';
+        break;
+        case 26:
+          this.estacion = 'Estacion 2';
+        break;
+        case 19:
+          this.estacion = 'Estacion 3';
+        break;
+      }
+    });
   }
 
   initialRandomSymbols() {
