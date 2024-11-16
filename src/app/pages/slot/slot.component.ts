@@ -1,4 +1,4 @@
-import { NgFor, NgStyle } from '@angular/common';
+import { NgClass, NgFor, NgStyle } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -14,7 +14,7 @@ import { SocketService } from '../../services/socket/socket.service';
 @Component({
   selector: 'app-slot',
   standalone: true,
-  imports: [NgFor, ReelComponent, NgStyle, RouterOutlet],
+  imports: [NgFor, ReelComponent, NgStyle, RouterOutlet, NgClass],
   templateUrl: './slot.component.html',
   styleUrls: ['./slot.component.css'],
   changeDetection: ChangeDetectionStrategy.Default,

@@ -26,6 +26,7 @@ export class ModalComponent {
     display: '',
     frequency: 1,
     is_active: true,
+    spins: '',
     start_time: '00:00',
     end_time: '23:59',
     active_days: '1111111'
@@ -50,7 +51,7 @@ export class ModalComponent {
   }
 
   get isFormValid(): boolean {
-    return this.formData['title'] && this.formData['amount'] && this.formData['display'];
+    return this.formData['title'] && this.formData['amount'] && this.formData['display'] && this.formData['spins'];
   }
 
   onCheckboxChange(event: Event, key: string) {
