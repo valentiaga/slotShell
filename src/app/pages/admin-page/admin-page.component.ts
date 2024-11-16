@@ -42,61 +42,26 @@ export class AdminPageComponent {
   paginationPageSizeSelector = [10, 20, 50, 100];
   idEmpresa = 1;
   displayFilterRow = false;
-
-  // contentModal: ModalContent = MODAL_ESTRUCTURA.INSUMO;
-
   showModal: boolean = false;
   showProcesarModal: boolean = false;
   showFormulaModal: boolean = false;
-
   themeClass = 'ag-theme-quartz-dark';
   private gridApi: GridApi<any> | undefined;
-  rowData: Premio[] = [
-    {
-      id_premio: 1,
-      identificacion: 'Premio A',
-      monto: 10000,
-      display: '10k',
-      is_activo: true,
-      hora_inicio: '08:00',
-      hora_fin: '10:00',
-      dias: [1, 1, 1, 1, 0, 0, 0],
-    },
-    {
-      id_premio: 2,
-      identificacion: 'Premio B',
-      monto: 20000,
-      display: '20k',
-      is_activo: false,
-      hora_inicio: '09:00',
-      hora_fin: '11:00',
-      dias: [0, 1, 1, 0, 1, 0, 0],
-    },
-    {
-      id_premio: 3,
-      identificacion: 'Premio C',
-      is_activo: true,
-      monto: 10000,
-      display: '100k',
-      hora_inicio: '10:00',
-      hora_fin: '12:00',
-      dias: [1, 1, 1, 1, 1, 1, 1],
-    },
-  ];
+  rowData: Premio[] = [];
 
   colDefs: ColDef[] = [
     {
       headerName: 'ID',
-      field: 'id_premio',
+      field: 'id_prize',
       flex: 1,
-      minWidth: 150,
-      editable: true,
+      minWidth: 80,
+      editable: false,
       filter: "agNumberColumnFilter",
       floatingFilter: this.displayFilterRow,
     },
     {
       headerName: 'Nombre',
-      field: 'identificacion',
+      field: 'title',
       flex: 1,
       minWidth: 150,
       editable: true,
@@ -105,7 +70,7 @@ export class AdminPageComponent {
     },
     {
       headerName: 'Monto',
-      field: 'monto',
+      field: 'amount',
       flex: 1,
       minWidth: 150,
       editable: true,
@@ -124,7 +89,7 @@ export class AdminPageComponent {
     },
     {
       headerName: 'Activo?',
-      field: 'is_activo',
+      field: 'is_active',
       flex: 1,
       minWidth: 150,
       editable: false,
@@ -140,15 +105,15 @@ export class AdminPageComponent {
     },
     {
       headerName: 'Días',
-      field: 'dias',
+      field: 'active_days',
       flex: 1,
-      minWidth: 250,
+      minWidth: 300,
       cellRenderer: DiasCellRendererComponent,
       editable: false,
     },
     {
       headerName: 'Hora inicio',
-      field: 'hora_inicio',
+      field: 'start_time',
       flex: 1,
       minWidth: 250,
       editable: true,
@@ -157,7 +122,7 @@ export class AdminPageComponent {
     },
     {
       headerName: 'Hora fin',
-      field: 'hora_fin',
+      field: 'end_time',
       flex: 1,
       minWidth: 250,
       editable: true,
@@ -167,7 +132,7 @@ export class AdminPageComponent {
     {
       width: 60,
       cellRenderer: (params: ICellRendererParams) => {
-        const rowId = params.data.id_premio;
+        const rowId = params.data.id_prize;
         const button = document.createElement('button');
         button.innerHTML = `<img src="/assets/svg/delete.svg" alt="Delete" style="width: 24px; height: 24px;">`;
         button.addEventListener('click', () => {
@@ -182,7 +147,7 @@ export class AdminPageComponent {
   ];
 
   public getRowId: GetRowIdFunc = (params: GetRowIdParams) => {
-    return params.data.id_premio.toString();
+    return params.data.id_prize.toString();
   };
 
   showFloatingFilters() {
@@ -207,16 +172,16 @@ export class AdminPageComponent {
   }
 
   agregarPremio(data: Premio): void {
-    // this.premiosService.postPremio(this.idEmpresa, data).subscribe({
-    //   next: (respuesta) => {
-    //     this.premiosService.clearCache();
-    //     console.log('Agregado con exito!', respuesta)
-    //     this.loadData();
-    //   },
-    //   error: (error) => {
-    //     console.error('Error al agregar el insumo:', error);
-    //   }
-    // });
+    this.premiosService.postPremio(this.idEmpresa, data).subscribe({
+      next: (respuesta) => {
+        this.premiosService.clearCache();
+        console.log('Agregado con exito!', respuesta)
+        this.loadData();
+      },
+      error: (error) => {
+        console.error('Error al agregar el premio:', error);
+      }
+    });
   }
 
   onGridReady(params: GridReadyEvent) {
@@ -225,22 +190,31 @@ export class AdminPageComponent {
   }
 
   loadData() {
-    // this.rowData = this.mockRowData()
-    // this.premiosService.getPremios(this.idEmpresa).subscribe({
-    //   next: (data) => {
-    //     this.gridApi?.setGridOption('rowData', data.body);
-    //   },
-    //   error: (error) => {
-    //     console.error('Error al obtener datos:', error);
-    //   },
-    //   complete: () => {
-    //     console.log('Datos cargados exitosamente');
-    //   }
-    // });
+    this.premiosService.getPremios(this.idEmpresa).subscribe({
+      next: (data) => {
+        console.log("🚀 ~ AdminPageComponent ~ this.premiosService.getPremios ~ data:", data);
+        this.gridApi?.setGridOption('rowData', data.body);
+      },
+      error: (error) => {
+        console.error('Error al obtener datos:', error);
+      },
+      complete: () => {
+        console.log('Datos cargados exitosamente');
+      }
+    });
   }
 
   onCellValueChanged(event: CellValueChangedEvent) {
-    //tambien necesitamos servicio
+    this.premiosService.putPrize(this.idEmpresa, event.data).subscribe({
+      next: (response) => {
+        this.premiosService.clearCache();
+        console.log('Agregado con exito!', response)
+        this.loadData();
+      },
+      error: (error) => {
+        console.error('Error al agregar el premio:', error);
+      }
+    });
   }
 
   deleteRow = (rowId: number) => {
@@ -248,14 +222,16 @@ export class AdminPageComponent {
       let alertRow = this.gridApi.getRowNode(rowId.toString());
 
       if (alertRow) {
-        this.premiosService.deleteRow(this.idEmpresa, rowId).subscribe(
-          (response) => {
+        this.premiosService.deleteRow(this.idEmpresa, rowId).subscribe({
+          next: (respuesta) => {
+            this.premiosService.clearCache();
+            console.log('Eliminado con exito!', respuesta)
             this.loadData();
           },
-          (error) => {
+          error: (error) => {
             console.error('Error al eliminar el premio:', error);
           }
-        );
+        });
       } else {
         console.warn(`No se encontró ninguna fila con id ${rowId}`);
       }

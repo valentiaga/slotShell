@@ -24,7 +24,7 @@
                 <input
                   type="string"
                   name="nombre"
-                  [(ngModel)]="formData['nombre']"
+                  [(ngModel)]="formData['title']"
                   id="nombre"
                   class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
                 />
@@ -54,7 +54,7 @@
                   <input
                     type="text"
                     name="monto"
-                    [(ngModel)]="formData['monto']"
+                    [(ngModel)]="formData['amount']"
                     id="monto"
                     class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5 ps-8"
                   />
@@ -109,7 +109,9 @@
               >Días</label
             >
             <app-dias-cell-renderer
-              [diasModal]="[1, 1, 1, 1, 1, 1, 1]"
+              [diasModal]= "formData['active_days']"
+              [isModal]="true"
+              (selectedDays)="onSelectedDays($event)"
               class="my-2"
             ></app-dias-cell-renderer>
             <div class="flex gap-4 my-2">
@@ -122,7 +124,7 @@
                 <input
                   type="time"
                   name="desde"
-                  [(ngModel)]="formData['desde']"
+                  [(ngModel)]="formData['start_time']"
                   id="desde"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
                 />
@@ -136,7 +138,7 @@
                 <input
                   type="time"
                   name="hasta"
-                  [(ngModel)]="formData['hasta']"
+                  [(ngModel)]="formData['end_time']"
                   id="hasta"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
                 />
@@ -144,13 +146,14 @@
             </div>
             <div class="flex items-center my-4">
               <input
-                id="checkbox-activo"
+                id="is_active"
+                [(ngModel)]="formData['is_active']"
+                name="is_active" 
                 type="checkbox"
                 checked
-                class="w-4 h-4 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 accent-orange-400"
               />
               <label
-                for="checkbox-activo"
+                for="is_active"
                 class="ms-2 text-sm font-medium text-gray-900"
                 >Activo</label
               >
@@ -165,6 +168,8 @@
             </button>
             <button
               type="submit"
+              [disabled]="!isFormValid"
+              [ngClass]="{ 'btn-disabled': !isFormValid }"
               class="add-button text-white text-base font-bold py-1 px-4 focus:ring-2 focus:ring-white focus:outline-none rounded"
             >
               Agregar

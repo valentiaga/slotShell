@@ -20,7 +20,7 @@ export class PremiosService {
       return of(this.premiosCache);
     }
 
-    const url = `${this.baseUrl}/${id_empresa}/premios`;
+    const url = `${this.baseUrl}/prizes`;
     return this.http.get<PremioResponse>(url).pipe(
       tap((premios) => this.premiosCache = premios)
     );
@@ -31,18 +31,23 @@ export class PremiosService {
   }
 
   postPremio(idEmpresa: number, nuevoPremio: Premio): Observable<any>{
-    const url = `${this.baseUrl}/${idEmpresa}/premio`;
+    const url = `${this.baseUrl}/prizes`;
     return this.http.post<any>(url, nuevoPremio);
   }
 
-  getPremio(idEmpresa: number, idPremio: number): Observable<Premio>{
-    const url =`${this.baseUrl}/${idEmpresa}/id_premio/${idPremio}`;
+  putPrize(idEmpresa: number, prize: Premio): Observable<any>{
+    const url = `${this.baseUrl}/prizes`;
+    return this.http.put<any>(url, prize);
+  }
+
+  getPremio(idEmpresa: number, id_prize: number): Observable<Premio>{
+    const url =`${this.baseUrl}/${idEmpresa}/id_premio/${id_prize}`;
     return this.http.get<Premio>(url);
   }
 
-  deleteRow(idEmpresa: number, idPremio: number) {
+  deleteRow(idEmpresa: number, id_prize: number) {
     return this.http
-      .delete(this.baseUrl + `/${idEmpresa}/premio/` + idPremio)
+      .delete(this.baseUrl + `/prizes/` + id_prize)
       .pipe(tap(() => this.premiosChanged.next()));
   }
 }

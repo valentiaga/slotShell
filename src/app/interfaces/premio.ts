@@ -1,12 +1,12 @@
 export interface Premio {
-    id_premio?: number;
-    identificacion: String;
-    is_activo: Boolean;
-    monto: number;
+    id_prize?: number;
+    title: String;
+    is_active: Boolean;
+    amoun: number;
     display: String;
-    hora_inicio: String;
-    hora_fin: String;
-    dias: Number[];
+    start_time: String;
+    end_time: String;
+    active_days: String;
 }
   
 export interface PremioResponse {
