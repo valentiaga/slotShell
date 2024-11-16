@@ -51,7 +51,7 @@ export class ModalComponent {
   }
 
   get isFormValid(): boolean {
-    return this.formData['title'] && this.formData['amount'] && this.formData['display'];
+    return this.formData['title'] && this.formData['amount'] && this.formData['display'] && this.formData['spins'];
   }
 
   onCheckboxChange(event: Event, key: string) {
