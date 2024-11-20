@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, computed, effect, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 import { SlotComponent } from './pages/slot/slot.component';
 import { HttpClientModule } from '@angular/common/http';
 import { HeaderComponent } from './components/header/header.component';
+import { AuthStatus } from './interfaces';
+import { AuthService } from './services/auth/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -13,4 +15,33 @@ import { HeaderComponent } from './components/header/header.component';
 })
 export class AppComponent {
   title = 'slot_shell';
+
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  public finishedAuthCheck = computed<boolean>(() => {
+    if (this.authService.authStatus() === AuthStatus.checking) {
+      return true;
+    }
+    return false;
+  })
+
+  public authStatusChangedEffect = effect( ()=> {
+
+    switch(this.authService.authStatus()){
+
+      case AuthStatus.checking:
+        return;
+
+      case AuthStatus.authenticated:
+        let url = localStorage.getItem('url')||'';
+        this.router.navigateByUrl(url);
+          break;
+
+      case AuthStatus.notAuthenticated:
+        if(this.router.url !== '/')
+          this.router.navigateByUrl('/login')
+        break;
+    };
+  })
 }

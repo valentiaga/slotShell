@@ -55,14 +55,8 @@ export class AuthService {
   }
 
   checkAuthStatus(): Observable<boolean> {
-    if(this.router.url === '/')
-      return of(false)
-    const url = `${this.baseUrl}/auth/check-token`
-    const _token = localStorage.getItem('token')
-    if (!_token) {
-      this.logout()
-      return of(false)
-    }
+    const url = `${this.baseUrl}/auth/check-token`;
+    const _token = localStorage.getItem('token') || '';
     const headers = new HttpHeaders()
       .set('Authorization', `Bearer ${_token}`)
       .set('Content-Type', 'application/json')
