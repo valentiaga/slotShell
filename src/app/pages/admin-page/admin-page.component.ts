@@ -176,26 +176,11 @@ export class AdminPageComponent {
 
   handleFormSubmit(formData: any) {
     console.log('Recibo los datos! ', formData);
-    const formDataToSend = new FormData();
-    formDataToSend.append('title', formData.title);
-    formDataToSend.append('amount', formData.amount);
-    formDataToSend.append('display', formData.display);
-    formDataToSend.append('frequency', formData.frequency);
-    formDataToSend.append('is_active', formData.is_active.toString());
-    formDataToSend.append('spins', formData.spins);
-    formDataToSend.append('start_time', formData.start_time);
-    formDataToSend.append('end_time', formData.end_time);
-    formDataToSend.append('active_days', formData.active_days);
-
-    if (formData.file) {
-      formDataToSend.append('file', formData.file);
-    }
-
-    this.agregarPremio(formDataToSend);
+    this.agregarPremio(formData);
     this.closeModal();
   }
 
-  agregarPremio(data: FormData): void {
+  agregarPremio(data: Premio): void {
     this.premiosService.postPremio(this.idEmpresa, data).subscribe({
       next: (respuesta) => {
         this.premiosService.clearCache();
