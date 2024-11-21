@@ -27,7 +27,7 @@ export class PremiosService {
     );
   }
   
-  postPremio(idEmpresa: number, nuevoPremio: FormData): Observable<any> {
+  postPremio(idEmpresa: number, nuevoPremio: Premio): Observable<any> {
     const url = `${this.baseUrl}/prizes`;
     return this.util.buildRequest<any>('post', url, nuevoPremio);
   }
