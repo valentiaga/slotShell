@@ -11,11 +11,13 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 export class DiasCellRendererComponent {
   @Input() diasModal: string = '';
   @Input() isModal: boolean = false;
-  @Output() selectedDays = new EventEmitter<any>();
+  @Output() selectedDays = new EventEmitter<string>();
   public dias: number[] = [];
   public diasMap = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  private params: any; 
 
   agInit(params: any): void {
+    this.params = params;
     this.dias = this.daysToArray(params.data.active_days);
   }
 
@@ -37,5 +39,9 @@ export class DiasCellRendererComponent {
   emitSelectedDays() {
     const diasString = this.dias.join('');
     this.selectedDays.emit(diasString);
+
+    if (this.params?.onDaysChanged) {
+      this.params.onDaysChanged(diasString, this.params);
+    }
   }
 }
