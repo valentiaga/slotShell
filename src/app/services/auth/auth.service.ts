@@ -15,13 +15,22 @@ export class AuthService {
   private router = inject(Router)
 
   private _currentUser = signal<User | null>(null)
-  private _authStatus = signal<AuthStatus>(AuthStatus.notAuthenticated)
+  private _authStatus = signal<AuthStatus>(AuthStatus.authenticated)
 
   public currentUser = computed ( () => this._currentUser()?.id_autenticacion);
   public authStatus = computed(() => this._authStatus())
 
   constructor() {
-    this.checkAuthStatus().subscribe()
+    this.initializeAuthStatus();
+  }
+  
+  private initializeAuthStatus() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.checkAuthStatus().subscribe();
+    } else {
+      this._authStatus.set(AuthStatus.notAuthenticated);
+    }
   }
 
   private setAuthentication(user: User|null, token: any): boolean {
