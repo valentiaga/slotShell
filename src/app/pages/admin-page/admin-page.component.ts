@@ -108,7 +108,23 @@ export class AdminPageComponent {
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.checked = params.value;
-        checkbox.disabled = false;
+      
+        checkbox.addEventListener('change', () => {
+          const newValue = checkbox.checked;
+          if (params.colDef?.field) {
+            params.data[params.colDef.field] = newValue;
+            params.api.refreshCells({ rowNodes: [params.node], force: true });
+      
+            this.onCellValueChanged({
+              data: params.data,
+              colDef: params.colDef,
+              rowIndex: params.data.id_prize,
+              oldValue: params.value,
+              newValue: newValue,
+            } as CellValueChangedEvent);
+          }
+        });
+      
         return checkbox;
       },
     },
@@ -119,6 +135,17 @@ export class AdminPageComponent {
       minWidth: 300,
       cellRenderer: DiasCellRendererComponent,
       editable: false,
+      cellRendererParams: {
+        onDaysChanged: (newDays: string, params: any) => {
+          params.node.setDataValue('active_days', newDays);
+          
+          this.onCellValueChanged({
+            data: { ...params.data, active_days: newDays },
+            colDef: params.colDef,
+            rowIndex: params.rowIndex,
+          } as CellValueChangedEvent);
+        },
+      },
     },
     {
       headerName: 'Hora inicio',
@@ -216,7 +243,6 @@ export class AdminPageComponent {
   loadData() {
     this.premiosService.getPremios(this.idEmpresa).subscribe({
       next: (data) => {
-        console.log("🚀 ~ AdminPageComponent ~ this.premiosService.getPremios ~ data:", data);
         this.gridApi?.setGridOption('rowData', data.body);
       },
       error: (error) => {
@@ -229,10 +255,13 @@ export class AdminPageComponent {
   }
 
   onCellValueChanged(event: CellValueChangedEvent) {
+    if (event.oldValue === event.newValue) {
+      return;
+    }
+    
     this.premiosService.putPrize(this.idEmpresa, event.data).subscribe({
       next: (response) => {
         this.premiosService.clearCache();
-        console.log('Agregado con exito!', response)
         this.loadData();
       },
       error: (error) => {
