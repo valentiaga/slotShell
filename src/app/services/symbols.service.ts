@@ -40,13 +40,32 @@ export class SymbolsService {
 
   checkTargetSymbol(): string | null {
     this.totalSpinCount > 99 ? 1 : this.totalSpinCount++;
-    for (let symbol of this.symbols) {
-      if (this.totalSpinCount % this.symbolMaxSpins[symbol] === 0) {
-        return symbol;
+  
+    // Filtrar símbolos que cumplen con la condición de spins
+    const validSymbols = this.symbols.filter((symbol) => {
+      return this.totalSpinCount % this.symbolMaxSpins[symbol] === 0;
+    });
+  
+    // Si no hay símbolos válidos, retornar null
+    if (validSymbols.length === 0) {
+      return null;
+    }
+  
+    // Encontrar el símbolo con el mayor valor de spins
+    let targetSymbol = validSymbols[0];
+    let maxSpins = this.symbolMaxSpins[validSymbols[0]];
+  
+    for (let symbol of validSymbols) {
+      const spins = this.symbolMaxSpins[symbol];
+      if (spins > maxSpins) {
+        maxSpins = spins;
+        targetSymbol = symbol;
       }
     }
-    return null;
+  
+    return targetSymbol;
   }
+  
 
   private updateSymbolsAndSpins(premios: Premio[]): void {
     const now = new Date();
