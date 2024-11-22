@@ -34,9 +34,7 @@ export class AppComponent {
         return;
 
       case AuthStatus.authenticated:
-        let url = localStorage.getItem('url')||'';
-        this.router.navigateByUrl(url);
-          break;
+          return;
 
       case AuthStatus.notAuthenticated:
         if(this.router.url !== '/')
