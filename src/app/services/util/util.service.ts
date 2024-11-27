@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
 @Injectable({
@@ -11,13 +11,18 @@ export class UtilService {
 
   private createAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    return new HttpHeaders({
+    if (!token) {
+      console.error('🚨 No se encontró el token en localStorage');
+      throw new Error('Token no disponible');
+    }
+    const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
+    return headers;
   }
 
   public buildRequest<T>(method: string, url: string, body?: any, secure: boolean = true ): Observable<T> {
-    const headers = secure? this.createAuthHeaders() : {};
+    let headers = secure? this.createAuthHeaders() : new HttpHeaders();
     switch (method.toLowerCase()) {
       case 'get':
         return this.http.get<T>(url, { headers });

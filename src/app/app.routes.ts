@@ -4,6 +4,7 @@ import { isAuthenticatedGuard } from './guards/is-authenticated.guard';
 export const routes: Routes = [
     {
       path: '',
+      canActivate: [isAuthenticatedGuard],
       loadComponent: () =>
         import('./pages/slot/slot.component').then((mod) => mod.SlotComponent),
     },

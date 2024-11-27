@@ -10,11 +10,12 @@ import { SymbolsService } from '../../services/symbols.service';
 import { ReelComponent } from '../../components/reel/reel.component';
 import { RouterOutlet } from '@angular/router';
 import { SocketService } from '../../services/socket/socket.service';
+import { CounterService } from '../../services/counter/counter.service';
 
 @Component({
   selector: 'app-slot',
   standalone: true,
-  imports: [NgFor, ReelComponent, NgStyle, RouterOutlet, NgClass],
+  imports: [NgFor, ReelComponent, RouterOutlet, NgClass],
   templateUrl: './slot.component.html',
   styleUrls: ['./slot.component.css'],
   changeDetection: ChangeDetectionStrategy.Default,
@@ -30,7 +31,7 @@ export class SlotComponent {
   socketService = inject(SocketService);
   estacion: string = '';
 
-  constructor(private symbolsService: SymbolsService) {}
+  constructor(private symbolsService: SymbolsService, private counterService: CounterService) {}
 
   async ngOnInit() {
     this.back = document.getElementById('audio_back') as HTMLAudioElement;
@@ -63,6 +64,14 @@ export class SlotComponent {
   }
 
   generateRandomSymbols() {
+    this.counterService.incrementCounter().subscribe({
+      next: () => {
+        console.log('El contador fue incrementado correctamente');
+      },
+      error: (err) => {
+        console.error('Hubo un error al incrementar el contador:', err);
+      }
+    });
     this.spinning.fill(true);
     this.targetSymbol = this.symbolsService.checkTargetSymbol();
     this.back?.play();

@@ -1,5 +1,5 @@
 import { CommonModule, NgIf } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AgGridAngular, AgGridModule } from 'ag-grid-angular';
@@ -17,6 +17,7 @@ import {
 import { HttpClientModule } from '@angular/common/http';
 import { DiasCellRendererComponent } from '../../components/dias-cell-renderer/dias-cell-renderer.component';
 import { ModalComponent } from '../../components/modal/modal.component';
+import { CounterService } from '../../services/counter/counter.service';
 
 @Component({
   selector: 'app-admin-page',
@@ -33,10 +34,10 @@ import { ModalComponent } from '../../components/modal/modal.component';
     ModalComponent
   ],
   templateUrl: './admin-page.component.html',
-  styleUrl: './admin-page.component.css'
+  styleUrl: './admin-page.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AdminPageComponent {
-  constructor(public premiosService: PremiosService) {}
+export class AdminPageComponent{
   pagination = true;
   paginationPageSize = 10;
   paginationPageSizeSelector = [10, 20, 50, 100];
@@ -48,6 +49,7 @@ export class AdminPageComponent {
   themeClass = 'ag-theme-quartz-dark';
   private gridApi: GridApi<any> | undefined;
   rowData: Premio[] = [];
+  counter: number = 0;
 
   colDefs: ColDef[] = [
     {
@@ -181,6 +183,11 @@ export class AdminPageComponent {
       editable: false,
     },
   ];
+
+  constructor(
+    public premiosService: PremiosService,
+    public counterService: CounterService
+  ) {}
 
   public getRowId: GetRowIdFunc = (params: GetRowIdParams) => {
     return params.data.id_prize.toString();
