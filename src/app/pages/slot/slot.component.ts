@@ -32,10 +32,11 @@ export class SlotComponent {
 
   constructor(private symbolsService: SymbolsService) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.back = document.getElementById('audio_back') as HTMLAudioElement;
     this.win = document.getElementById('audio_win') as HTMLAudioElement;
     this.initialRandomSymbols();
+    // await this.socketService.connectToRaspberryPi();
     this.socketService.onPinChange().subscribe(data => {
       console.log('Cambia el pin!', data); 
       if (data.state === "HIGH"){
@@ -87,22 +88,8 @@ export class SlotComponent {
     }
   }
 
-  getSlotStyle(index: number): object {
-    const positions = [
-      { left: '0%', top: '15%' },
-      { left: '0%', top: '15%' },
-      { left: '0%', top: '15%' }
-    ];
-
-    return positions[index];
-  }
-
   getDuration(index: number) {
     let duration = 0;
-    
-    // if (index>0){
-    //   let match: boolean = .
-    // }
 
     switch (index) {
       case 0: 
