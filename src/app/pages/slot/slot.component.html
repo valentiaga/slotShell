@@ -1,24 +1,62 @@
 <main class="h-screen flex flex-col items-center justify-center relative">
-  <div class="absolute inset-0 z-0">
-    <img src="../../../assets/img/EspacioShell.jpg" alt="Background Image" class="w-screen h-screen object-cover" />
+  <div class="relative w-screen h-screen">
+    <!-- Imagen de fondo -->
+    <div class="absolute inset-0 z-0">
+      <img src="../../../assets/img/Fondo.jpg" alt="Background Image" class="w-screen h-screen object-cover" />
+    </div>
+  
+    <!-- Contenedor de los surtidores con sus componentes -->
+    <section class="absolute inset-0 flex items-center justify-center w-3/4 mx-auto">
+      <!-- Surtidor Izquierda -->
+      <div class="relative h-full w-full flex items-center justify-center">
+        <img src="../../../assets/img/Surtidor_izquierda_A.png" alt="Surtidor Izquierda" class="object-contain h-full w-full z-20" />
+        <!-- Componente en el cuadrado vacío -->
+        <app-reel
+          class="absolute top-[30%] left-[19%] w-[50%] h-[30%] flex items-center justify-center z-10  bg-white"
+          [duration]="getDuration(0)"
+          [index]="0"
+          [targetSymbol]="targetSymbol"
+          (stop)="onReelStop(0)"
+          [ngClass]="'small-symbol'" 
+        ></app-reel>
+      </div>
+  
+      <!-- Surtidor Medio -->
+      <div class="relative h-full w-full flex items-center justify-center">
+        <img src="../../../assets/img/Surtidor_medio.png" alt="Surtidor Medio" class="object-contain h-full w-full z-10" />
+        <app-reel
+          class="absolute top-[30%] left-[25%] w-[50%] h-[30%] flex items-center justify-center z-20"
+          [duration]="getDuration(1)"
+          [index]="1"
+          [targetSymbol]="targetSymbol"
+          (stop)="onReelStop(1)"
+          [ngClass]="'small-symbol'" 
+        ></app-reel>
+      </div>
+  
+      <!-- Surtidor Derecha -->
+      <div class="relative h-full w-full flex items-center justify-center">
+        <img src="../../../assets/img/Surtidor_derecha_A.png" alt="Surtidor Derecha" class="object-contain h-full w-full z-20" />
+        <app-reel
+          class="absolute top-[30%] right-[19%] w-[50%] h-[30%] flex items-center justify-center z-10 bg-white"
+          [duration]="getDuration(2)"
+          [index]="2"
+          [targetSymbol]="targetSymbol"
+          (stop)="onReelStop(2)"
+          [ngClass]="'small-symbol'" 
+        ></app-reel>
+      </div>
+    </section>
   </div>
-  <section class="w-full flex items-center justify-center gap-6 z-10 relative mb-20" style="height: 47%">
-    <app-reel
-      class="flex items-center justify-center h-2/3 w-1/6 relative overflow-hidden"
-      *ngFor="let symbol of randomSymbols; let i = index"
-      [duration]="getDuration(i)"
-      [targetSymbol]="targetSymbol"
-      (stop)="onReelStop(i)"
-      [ngStyle]="getSlotStyle(i)"
-    ></app-reel>
-  </section>
+  
+  
 
   <button
     (click)="generateRandomSymbols()"
     type="button"
     [disabled]="spinning.includes(true)"
     class="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br font-medium rounded-lg px-5 py-2.5 text-center me-2 w-40 text-4xl z-10">
-    Girar
+    {{ estacion }}
   </button>
 </main>
 

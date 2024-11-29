@@ -1,18 +1,21 @@
-import { NgFor, NgStyle } from '@angular/common';
+import { NgClass, NgFor, NgStyle } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   QueryList,
   ViewChildren,
 } from '@angular/core';
 import { SymbolsService } from '../../services/symbols.service';
 import { ReelComponent } from '../../components/reel/reel.component';
 import { RouterOutlet } from '@angular/router';
+import { SocketService } from '../../services/socket/socket.service';
+import { CounterService } from '../../services/counter/counter.service';
 
 @Component({
   selector: 'app-slot',
   standalone: true,
-  imports: [NgFor, ReelComponent, NgStyle, RouterOutlet],
+  imports: [NgFor, ReelComponent, RouterOutlet, NgClass],
   templateUrl: './slot.component.html',
   styleUrls: ['./slot.component.css'],
   changeDetection: ChangeDetectionStrategy.Default,
@@ -25,13 +28,33 @@ export class SlotComponent {
   targetSymbol?: string | null;
   back?: HTMLAudioElement;
   win?: HTMLAudioElement;
+  socketService = inject(SocketService);
+  estacion: string = '';
 
-  constructor(private symbolsService: SymbolsService) {}
+  constructor(private symbolsService: SymbolsService, private counterService: CounterService) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.back = document.getElementById('audio_back') as HTMLAudioElement;
     this.win = document.getElementById('audio_win') as HTMLAudioElement;
     this.initialRandomSymbols();
+    // await this.socketService.connectToRaspberryPi();
+    this.socketService.onPinChange().subscribe(data => {
+      console.log('Cambia el pin!', data); 
+      if (data.state === "HIGH"){
+        this.generateRandomSymbols()
+      }
+      switch(data.pin){
+        case 13:
+          this.estacion = 'Estacion 1';
+        break;
+        case 26:
+          this.estacion = 'Estacion 2';
+        break;
+        case 19:
+          this.estacion = 'Estacion 3';
+        break;
+      }
+    });
   }
 
   initialRandomSymbols() {
@@ -41,6 +64,14 @@ export class SlotComponent {
   }
 
   generateRandomSymbols() {
+    this.counterService.incrementCounter().subscribe({
+      next: () => {
+        console.log('El contador fue incrementado correctamente');
+      },
+      error: (err) => {
+        console.error('Hubo un error al incrementar el contador:', err);
+      }
+    });
     this.spinning.fill(true);
     this.targetSymbol = this.symbolsService.checkTargetSymbol();
     this.back?.play();
@@ -66,22 +97,8 @@ export class SlotComponent {
     }
   }
 
-  getSlotStyle(index: number): object {
-    const positions = [
-      { left: '0%', top: '15%' },
-      { left: '0%', top: '15%' },
-      { left: '0%', top: '15%' }
-    ];
-
-    return positions[index];
-  }
-
   getDuration(index: number) {
     let duration = 0;
-    
-    // if (index>0){
-    //   let match: boolean = .
-    // }
 
     switch (index) {
       case 0: 

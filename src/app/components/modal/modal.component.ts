@@ -13,14 +13,24 @@ import { DiasCellRendererComponent } from '../dias-cell-renderer/dias-cell-rende
 })
 export class ModalComponent {
   @Input() showFormulaButton: boolean = false;
-  isChecked = true;
   @Output() close = new EventEmitter();
   @Output() formSubmit = new EventEmitter<any>();
   @Output() addFormula = new EventEmitter<any>();
-  formData: { [key: string]: any } = {};
   @Input() isToggled: boolean = false;
+  isChecked = true;
   showFileInput = false;
   displayDisabled = false;
+  formData: { [key: string]: any } = {
+    title: '',
+    amount: '',
+    display: '',
+    frequency: 1,
+    is_active: true,
+    spins: '',
+    start_time: '00:00',
+    end_time: '23:59',
+    active_days: '1111111'
+  };
 
   toggleFileInput() {
     this.showFileInput = !this.showFileInput;
@@ -32,8 +42,16 @@ export class ModalComponent {
     this.formSubmit.emit(this.formData);
   }
 
+  onSelectedDays(selectedDays: any) {    
+    this.formData['active_days'] = selectedDays;
+  }
+
   onClose() {
     this.close.emit(null);
+  }
+
+  get isFormValid(): boolean {
+    return this.formData['title'] && this.formData['amount'] && this.formData['display'] && this.formData['spins'];
   }
 
   onCheckboxChange(event: Event, key: string) {

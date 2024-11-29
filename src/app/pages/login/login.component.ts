@@ -49,12 +49,10 @@ export class LoginPageComponent {
     this.authService.login(username,password)
       .subscribe({
         next: () => {
-          this.router.navigateByUrl('/home')},
+          this.router.navigateByUrl('/panel')},
         error: () => {
           console.log('error al loguear');
         }
       })
   }
-
-
 }
