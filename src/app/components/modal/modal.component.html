@@ -24,7 +24,7 @@
                 <input
                   type="string"
                   name="nombre"
-                  [(ngModel)]="formData['nombre']"
+                  [(ngModel)]="formData['title']"
                   id="nombre"
                   class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
                 />
@@ -54,7 +54,7 @@
                   <input
                     type="text"
                     name="monto"
-                    [(ngModel)]="formData['monto']"
+                    [(ngModel)]="formData['amount']"
                     id="monto"
                     class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5 ps-8"
                   />
@@ -75,7 +75,7 @@
                 [disabled]="displayDisabled"
                 class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
               />
-              <button
+              <!-- <button
                 class="absolute inset-y-0 end-0 flex items-center ps-3.5 pe-3.5 bg-gray-200 rounded-md hover:bg-gray-300"
                 type="button"
                 (click)="toggleFileInput()"
@@ -91,17 +91,17 @@
                     d="M480-480ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h320v80H200v560h560v-320h80v320q0 33-23.5 56.5T760-120H200Zm40-160h480L570-480 450-320l-90-120-120 160Zm440-320v-80h-80v-80h80v-80h80v80h80v80h-80v80h-80Z"
                   />
                 </svg>
-              </button>
+              </button> -->
             </div>
 
             <!-- Input de archivo, escondido por defecto -->
-            <div *ngIf="showFileInput">
+            <!-- <div *ngIf="showFileInput">
               <input
                 class="block w-full my-4 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50"
                 id="default_size"
                 type="file"
               />
-            </div>
+            </div> -->
 
             <label
               for="dias"
@@ -109,7 +109,9 @@
               >Días</label
             >
             <app-dias-cell-renderer
-              [diasModal]="[1, 1, 1, 1, 1, 1, 1]"
+              [diasModal]= "formData['active_days']"
+              [isModal]="true"
+              (selectedDays)="onSelectedDays($event)"
               class="my-2"
             ></app-dias-cell-renderer>
             <div class="flex gap-4 my-2">
@@ -122,7 +124,7 @@
                 <input
                   type="time"
                   name="desde"
-                  [(ngModel)]="formData['desde']"
+                  [(ngModel)]="formData['start_time']"
                   id="desde"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
                 />
@@ -136,21 +138,36 @@
                 <input
                   type="time"
                   name="hasta"
-                  [(ngModel)]="formData['hasta']"
+                  [(ngModel)]="formData['end_time']"
                   id="hasta"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
+                />
+              </div>
+              <div>
+                <label
+                  for="spins"
+                  class="block mb-2 w-full text-sm font-medium text-gray-900"
+                  >Contador</label
+                >
+                <input
+                  type="number"
+                  name="spins"
+                  [(ngModel)]="formData['spins']"
+                  id="spins"
+                  class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
                 />
               </div>
             </div>
             <div class="flex items-center my-4">
               <input
-                id="checkbox-activo"
+                id="is_active"
+                [(ngModel)]="formData['is_active']"
+                name="is_active" 
                 type="checkbox"
                 checked
-                class="w-4 h-4 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 accent-orange-400"
               />
               <label
-                for="checkbox-activo"
+                for="is_active"
                 class="ms-2 text-sm font-medium text-gray-900"
                 >Activo</label
               >
@@ -165,6 +182,8 @@
             </button>
             <button
               type="submit"
+              [disabled]="!isFormValid"
+              [ngClass]="{ 'btn-disabled': !isFormValid }"
               class="add-button text-white text-base font-bold py-1 px-4 focus:ring-2 focus:ring-white focus:outline-none rounded"
             >
               Agregar

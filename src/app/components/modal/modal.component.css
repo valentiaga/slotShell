@@ -1,3 +1,9 @@
 .add-button {
     background-color: rgb(46, 120, 101);
+    transition: opacity 0.3s;
+}
+
+.btn-disabled {
+    opacity: 0.5;
+    pointer-events: none;
 }
