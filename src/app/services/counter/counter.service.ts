@@ -9,20 +9,19 @@ import { map, Observable, of, tap } from 'rxjs';
   providedIn: 'root'
 })
 export class CounterService {
-
   private readonly baseUrl: string = environments.BASE_URL
-  private _counter: WritableSignal<number> = signal(0);
-  public counter = computed(() => this._counter())
-  private idEmpresa = environments.ID_EMPRESA;
 
-  constructor(private http: HttpClient, private util: UtilService) {
-    this.getCounter(this.idEmpresa).subscribe();
-  }
+  constructor(private http: HttpClient, private util: UtilService) {}
 
-  getCounter(id_empresa: number): Observable<number> {  
-    const url = `${this.baseUrl}/counters/id_authentication/${id_empresa}`;
+  getCounter(): Observable<number> {      
+    const idAuth = localStorage.getItem('idAuth');  
+  
+    if (!idAuth) {
+      throw new Error('No se ha encontrado id_authentication en el almacenamiento local');
+    }
+  
+    const url = `${this.baseUrl}/counters/id_authentication/${idAuth}`;
     return this.util.buildRequest<CounterResponse>('get', url).pipe(
-      tap((response) => this._counter.set(response.body.counter)),
       map((response) => response.body.counter)
     );
   }

@@ -17,9 +17,9 @@ export class PremiosService {
   constructor(private http: HttpClient, private util: UtilService) {}
 
   getPremios(id_empresa: number): Observable<PremioResponse> {
-    if (this.premiosCache) {
-      return of(this.premiosCache);
-    }
+    // if (this.premiosCache) {
+    //   return of(this.premiosCache);
+    // }
   
     const url = `${this.baseUrl}/prizes`;
     return this.util.buildRequest<PremioResponse>('get', url).pipe(

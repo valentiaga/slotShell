@@ -1,5 +1,5 @@
 export interface User {
-    id_autenticacion?: number;
+    id_authentication?: number;
     name:     String;
     username: String;
     password: String;
