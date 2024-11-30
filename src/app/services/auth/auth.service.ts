@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { environments } from '../../../assets/environment';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthStatus, LoginResponse, User } from '../../interfaces';
-import { Observable, catchError, map, of, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, of, tap, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Injectable({
@@ -17,8 +17,11 @@ export class AuthService {
   private _currentUser = signal<User | null>(null)
   private _authStatus = signal<AuthStatus>(AuthStatus.authenticated)
 
-  public currentUser = computed ( () => this._currentUser()?.id_autenticacion);
+  public currentUser = computed ( () => this._currentUser()?.id_authentication);
   public authStatus = computed(() => this._authStatus())
+
+  private _isAuthenticated = new BehaviorSubject<boolean>(false);
+  public isAuthenticated$ = this._isAuthenticated.asObservable();
 
   constructor() {
     this.initializeAuthStatus();
@@ -34,33 +37,41 @@ export class AuthService {
   }
 
   private setAuthentication(user: User|null, token: any): boolean {
-    this._currentUser.set(user)
-    this._authStatus.set(AuthStatus.authenticated)
-    localStorage.setItem('token', token)
+    this._currentUser.set(user);
+    this._authStatus.set(AuthStatus.authenticated);
+    localStorage.setItem('token', token);
+    this._isAuthenticated.next(true);
     return true
   }
 
-
-  login(username: string, password: string): Observable<boolean> {
+  login(username: string, password: string): Observable<any> {
     const url = `${this.baseUrl}/auth/login`
     const body = { username, password }
-    return this.request(url, body)
+    
+    return this.request(url, body).pipe(
+      tap((response) => {
+        localStorage.setItem('idAuth', response.body.id_authentication.toString());
+      }),
+      map(() => this._isAuthenticated.next(true))
+    );
   }
 
-  register(username: string, password: string, nombre: string, email: any, dni: any): Observable<boolean> {
+  register(username: string, password: string, nombre: string, email: any, dni: any): Observable<void> {
     const url = `${this.baseUrl}/users`
     const body = {username, password, nombre, email, dni}
     return this.request(url, body)
   }
 
-  private request(url: string, body: any): Observable<boolean> {
-    return this.httpClient.post<LoginResponse>(url, body)
-      .pipe(
-        map((response) => this.setAuthentication(response.body.user, response.body.token)),
-        catchError((err) => {
-          return throwError(() => err)
-        })
-      )
+  private request(url: string, body: any): Observable<any> {
+    return this.httpClient.post<LoginResponse>(url, body).pipe(
+      map((response) => {
+        this.setAuthentication(response.body.user, response.body.token);
+        return response;
+      }),
+      catchError((err) => {
+        return throwError(() => err);
+      })
+    );
   }
 
   checkAuthStatus(): Observable<boolean> {
@@ -80,9 +91,10 @@ export class AuthService {
   }
 
   logout() {
-    localStorage.removeItem('token')
-    this._currentUser.set(null)
-    this._authStatus.set(AuthStatus.notAuthenticated)
+    localStorage.removeItem('token');
+    localStorage.removeItem('idAuth');
+    this._currentUser.set(null);
+    this._authStatus.set(AuthStatus.notAuthenticated);
     this.router.navigateByUrl('/login');
   }
 }

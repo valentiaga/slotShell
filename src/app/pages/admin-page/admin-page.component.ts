@@ -229,6 +229,9 @@ export class AdminPageComponent{
 
   onGridReady(params: GridReadyEvent) {
     this.gridApi = params.api;
+    this.counterService.getCounter().subscribe(counter => {
+      this.counter = counter;
+    });
     this.loadData();
   }
 

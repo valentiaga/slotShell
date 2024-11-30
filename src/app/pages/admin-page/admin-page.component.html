@@ -1,10 +1,9 @@
 <main>
-    <div class="container mx-auto">
-      <div class="flex items-start ">
-        <h1 class="text-4xl font-medium">Premios</h1>
-      </div>
-      <div class="flex justify-between">
-          <h3>Contador global:  {{ counterService.counter() }}</h3>
+    <div class="container mx-auto text-gray-800">
+        <h1 class="text-4xl mb-4">PREMIOS</h1>
+      
+        <div class="flex justify-between">
+          <p class="text-lg">Contador global:  {{ counter }}</p>
           <button
             (click)="showModal=true"
             class="add-button text-white text-base font-bold py-1 px-4 focus:ring-2 focus:ring-white focus:outline-none rounded">
@@ -14,7 +13,7 @@
       <div class="grid">
         <ag-grid-angular
           class="ag-theme-quartz"
-          style="height: 500px; width: 100%"
+          style="height: 500px; width: 100%;"
           [getRowId]="getRowId"
           [rowData]="rowData"
           [columnDefs]="colDefs"

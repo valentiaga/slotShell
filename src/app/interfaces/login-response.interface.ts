@@ -1,7 +1,8 @@
 import { User } from './user.interface';
 
 export interface Login {
-  token: String;
+  token: string;
+  id_authentication: number;
   user: User;
 }
 
