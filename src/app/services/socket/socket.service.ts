@@ -10,86 +10,104 @@ import { UtilService } from '../util/util.service';
 })
 export class SocketService {
 
-  private socket: Socket | undefined;
-  private socketIP: Socket;
-  private raspberryIp: string = '';
-  private readonly baseUrl: string = environments.BASE_URL
-  private pinChangeSubject = new BehaviorSubject<any>({});
+  private socket: Socket;
+  private readonly SERVER_URL = 'http://localhost:3000';
 
-  constructor(private http: HttpClient, private util: UtilService) {
-    // Conexión al backend
-    this.socketIP = io(`172.20.10.9:3000`); 
-    this.connectToRaspberryPi();
-    console.log("🚀 ~ SocketService ~ constructor ~ this.socketIP:", this.socketIP);
-
-    // Eventos del backend
-    this.socketIP.on('connect', () => {
-      console.log('Conectado al backend');
-    });
-
-    this.socketIP.on('disconnect', () => {
-      console.log('Desconectado del backend');
-    });
-
-    // Escuchar cambios de IP desde el backend
-    this.onIpUpdated().subscribe((data) => {
-      console.log(`Nueva IP de la Raspberry Pi recibida: ${data.ip_address}`);
-      this.reconnectToRaspberryPi(data.ip_address);
-    });
+  constructor() {
+    // Conexión al servidor de sockets
+    this.socket = io(this.SERVER_URL);
   }
 
-  async connectToRaspberryPi() {
+  // Método para unirse a un room
+  joinRoom(room: string): void {
+    this.socket.emit('joinRoom', room);
+  }
+
+  // Escuchar eventos de "accionarRuleta"
+  onRuletaAccionada(callback: (message: string) => void): void {
+    this.socket.on('accionarRuleta', callback);
+  }
+
+  // private socket: Socket | undefined;
+  // private socketIP: Socket;
+  // private raspberryIp: string = '';
+  // private readonly baseUrl: string = environments.BASE_URL
+  // private pinChangeSubject = new BehaviorSubject<any>({});
+
+  // constructor(private http: HttpClient, private util: UtilService) {
+  //   // Conexión al backend
+  //   this.socketIP = io(`172.20.10.9:3000`); 
+  //   this.connectToRaspberryPi();
+  //   console.log("🚀 ~ SocketService ~ constructor ~ this.socketIP:", this.socketIP);
+
+  //   // Eventos del backend
+  //   this.socketIP.on('connect', () => {
+  //     console.log('Conectado al backend');
+  //   });
+
+  //   this.socketIP.on('disconnect', () => {
+  //     console.log('Desconectado del backend');
+  //   });
+
+  //   // Escuchar cambios de IP desde el backend
+  //   this.onIpUpdated().subscribe((data) => {
+  //     console.log(`Nueva IP de la Raspberry Pi recibida: ${data.ip_address}`);
+  //     this.reconnectToRaspberryPi(data.ip_address);
+  //   });
+  // }
+
+  // async connectToRaspberryPi() {
     
-    this.getCurrentIP().subscribe((response => {
-      console.log(response.body);
-      this.raspberryIp = response.body;
-      this.socket = io(`http://${this.raspberryIp}:5000`);
+  //   this.getCurrentIP().subscribe((response => {
+  //     console.log(response.body);
+  //     this.raspberryIp = response.body;
+  //     this.socket = io(`http://${this.raspberryIp}:5000`);
       
-        this.socket.on('connect', () => {
-          console.log('Conectado al servidor de Raspberry Pi');
-          this.toggleLed();
-        });
+  //       this.socket.on('connect', () => {
+  //         console.log('Conectado al servidor de Raspberry Pi');
+  //         this.toggleLed();
+  //       });
 
-        this.socket.on('pin_change', (data) => {
-          console.log('Evento pin_change recibido:', data);
-          this.pinChangeSubject.next(data); // Emitir el evento
-        });
+  //       this.socket.on('pin_change', (data) => {
+  //         console.log('Evento pin_change recibido:', data);
+  //         this.pinChangeSubject.next(data); // Emitir el evento
+  //       });
     
-        this.socket.on('disconnect', () => {
-          console.log('Desconectado del servidor de Raspberry Pi');
-        });
-      }
-    ));
+  //       this.socket.on('disconnect', () => {
+  //         console.log('Desconectado del servidor de Raspberry Pi');
+  //       });
+  //     }
+  //   ));
 
-  }
+  // }
 
-  private reconnectToRaspberryPi(newIp: string) {
-    if (this.socket) {
-      this.socket.disconnect();
-      console.log('Conexión anterior cerrada');
-    }
+  // private reconnectToRaspberryPi(newIp: string) {
+  //   if (this.socket) {
+  //     this.socket.disconnect();
+  //     console.log('Conexión anterior cerrada');
+  //   }
 
-    this.raspberryIp = newIp;
-    this.connectToRaspberryPi();
-  }
+  //   this.raspberryIp = newIp;
+  //   this.connectToRaspberryPi();
+  // }
 
-  toggleLed() {
-    this.socket?.emit('toggle-led');
-  }
+  // toggleLed() {
+  //   this.socket?.emit('toggle-led');
+  // }
 
-  // Escuchar cambios de pin
-  onPinChange(): Observable<any> {
-    return this.pinChangeSubject.asObservable(); // Devuelve el Subject como un Observable
-  }
+  // // Escuchar cambios de pin
+  // onPinChange(): Observable<any> {
+  //   return this.pinChangeSubject.asObservable(); // Devuelve el Subject como un Observable
+  // }
   
 
-  onIpUpdated(): Observable<{ ip_address: string }> {
-    return fromEvent<{ ip_address: string }>(this.socketIP, 'ip_updated');
-  }
+  // onIpUpdated(): Observable<{ ip_address: string }> {
+  //   return fromEvent<{ ip_address: string }>(this.socketIP, 'ip_updated');
+  // }
 
-  getCurrentIP() {
-    const url = `${this.baseUrl}/ip/current-ip`
-    console.log("🚀 ~ SocketService ~ getCurrentIP ~ this.util.buildRequest<any>('get', url):", this.util.buildRequest<any>('get', url));
-    return this.util.buildRequest<any>('get', url);
-  }
+  // getCurrentIP() {
+  //   const url = `${this.baseUrl}/ip/current-ip`
+  //   console.log("🚀 ~ SocketService ~ getCurrentIP ~ this.util.buildRequest<any>('get', url):", this.util.buildRequest<any>('get', url));
+  //   return this.util.buildRequest<any>('get', url);
+  // }
 }
