@@ -11,7 +11,7 @@ import { UtilService } from '../util/util.service';
 export class SocketService {
 
   private socket: Socket;
-  private readonly SERVER_URL = 'http://localhost:3000';
+  private readonly SERVER_URL = 'api.shell-suarez.com';
 
   constructor() {
     // Conexión al servidor de sockets
