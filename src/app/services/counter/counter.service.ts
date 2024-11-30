@@ -1,39 +1,45 @@
-import { computed, EventEmitter, Injectable, signal, Signal, WritableSignal } from '@angular/core';
+import { Injectable, signal, WritableSignal } from '@angular/core';
 import { environments } from '../../../assets/environment';
-import { Counter, CounterResponse, postCounter } from '../../interfaces/counter';
+import { CounterResponse, postCounter } from '../../interfaces/counter';
 import { UtilService } from '../util/util.service';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, of, tap } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CounterService {
-  private readonly baseUrl: string = environments.BASE_URL
+  private readonly baseUrl: string = environments.BASE_URL;
+  // Signal to store the counter value
+  private counterSignal: WritableSignal<number> = signal(0);  // Default value 0
 
   constructor(private http: HttpClient, private util: UtilService) {}
 
-  getCounter(): Observable<number> {      
+  // Method to get the current counter value from the server
+  getCounter(): WritableSignal<number> {
     const idAuth = localStorage.getItem('idAuth');  
-  
+
     if (!idAuth) {
       throw new Error('No se ha encontrado id_authentication en el almacenamiento local');
     }
-  
+
     const url = `${this.baseUrl}/counters/id_authentication/${idAuth}`;
-    return this.util.buildRequest<CounterResponse>('get', url).pipe(
-      map((response) => response.body.counter)
-    );
+    this.util.buildRequest<CounterResponse>('get', url).pipe(
+      map((response) => {
+        this.counterSignal.set(response.body.counter);  // Update the signal with the response
+      })
+    ).subscribe();  // You can handle errors in your `buildRequest` method
+
+    return this.counterSignal;  // Return the signal to the component
   }
 
   postCounter(nuevoCounter: postCounter): Observable<any> {
     const url = `${this.baseUrl}/counters`;
     return this.util.buildRequest<any>('post', url, nuevoCounter);
   }
-  
-  incrementCounter(): Observable<any> {
-    const url = `${this.baseUrl}/counters/increment`;
-    const body = { message: 'Hola' };
-    return this.util.buildRequest<any>('post', url, body);
+
+  incrementCounter(estacionID: number): Observable<any> {
+    const url = `${this.baseUrl}/counters/increment?tenantId=${estacionID}`;
+    return this.util.buildRequest<any>('post', url, {}, false);
   }
 }

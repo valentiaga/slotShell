@@ -23,7 +23,7 @@ import { CounterService } from '../../services/counter/counter.service';
 })
 export class SlotComponent implements OnInit{
   @ViewChildren(ReelComponent) reels!: QueryList<ReelComponent>;
-  estacionId!: number;
+  estacionID!: number;
   randomSymbols: string[] = ['', '', ''];
   spinning: boolean[] = new Array<boolean>(3).fill(false);
   totalSpinCount: number = 0;
@@ -44,12 +44,13 @@ export class SlotComponent implements OnInit{
   loadSymbols(){
     this.back = document.getElementById('audio_back') as HTMLAudioElement;
     this.win = document.getElementById('audio_win') as HTMLAudioElement;
+    this.symbolsService.loadSymbols(this.estacionID);
     this.initialRandomSymbols();
   }
 
   setEstacion() {
-    this.estacionId = this.route.snapshot.data['id'];
-    switch (this.estacionId) {
+    this.estacionID = this.route.snapshot.data['id'];
+    switch (this.estacionID) {
       case 1:
         console.log('Estación Garay seleccionada');
         break;
@@ -92,7 +93,7 @@ export class SlotComponent implements OnInit{
   }
 
   generateRandomSymbols() {
-    this.counterService.incrementCounter().subscribe({
+    this.counterService.incrementCounter(this.estacionID).subscribe({
       next: () => {
         console.log('El contador fue incrementado correctamente');
       },

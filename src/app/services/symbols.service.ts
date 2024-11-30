@@ -17,12 +17,9 @@ export class SymbolsService {
   constructor(
     private http: HttpClient,
     private premiosService: PremiosService
-  ) {
-    this.loadSymbols();
-  }
+  ) {}
 
-  private loadSymbols(): void {
-    const estacionID = parseInt(localStorage.getItem('idAuth') || '', 10);
+  loadSymbols(estacionID: number): void {
     this.premiosService.getPremios(estacionID).subscribe({
       next: (response) => {
         if (response.error) {
