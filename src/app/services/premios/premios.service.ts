@@ -20,11 +20,15 @@ export class PremiosService {
 
     if (estacionID) {
       url += `?tenantId=${estacionID}`;
+      return this.util.buildRequest<PremioResponse>('get', url, {}, false).pipe(
+        tap((premios) => console.log(premios))
+      );
+    } else {
+      return this.util.buildRequest<PremioResponse>('get', url).pipe(
+        tap((premios) => console.log(premios))
+      );
     }
     
-    return this.util.buildRequest<PremioResponse>('get', url).pipe(
-      tap((premios) => this.premiosCache = premios)
-    );
   }
   
   postPremio(nuevoPremio: Premio): Observable<any> {

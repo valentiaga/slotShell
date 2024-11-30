@@ -1,5 +1,5 @@
 import { CommonModule, NgIf } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AgGridAngular, AgGridModule } from 'ag-grid-angular';
@@ -38,7 +38,7 @@ import { environments } from '../../../assets/environment';
   styleUrl: './admin-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AdminPageComponent{
+export class AdminPageComponent implements OnInit{
   pagination = true;
   paginationPageSize = 10;
   paginationPageSizeSelector = [10, 20, 50, 100];
@@ -49,7 +49,8 @@ export class AdminPageComponent{
   themeClass = 'ag-theme-quartz-dark';
   private gridApi: GridApi<any> | undefined;
   rowData: Premio[] = [];
-  counter: number = 0;
+  counterSignal = this.counterService.getCounter();  // Get the signal
+
 
   colDefs: ColDef[] = [
     {
@@ -227,11 +228,12 @@ export class AdminPageComponent{
     });
   }
 
+  ngOnInit() {
+    this.counterService.getCounter();
+  }
+
   onGridReady(params: GridReadyEvent) {
     this.gridApi = params.api;
-    this.counterService.getCounter().subscribe(counter => {
-      this.counter = counter;
-    });
     this.loadData();
   }
 
