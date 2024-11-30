@@ -3,7 +3,7 @@ import { User } from './user.interface';
 export interface Login {
   token: string;
   id_authentication: number;
-  user: User;
+  username: string;
 }
 
 export interface LoginResponse {

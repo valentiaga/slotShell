@@ -14,10 +14,10 @@ export class AuthService {
   private httpClient = inject(HttpClient)
   private router = inject(Router)
 
-  private _currentUser = signal<User | null>(null)
+  // private _currentUser = signal<string | null>(null)
   private _authStatus = signal<AuthStatus>(AuthStatus.authenticated)
 
-  public currentUser = computed ( () => this._currentUser()?.id_authentication);
+  // public currentUser = computed ( () => this._currentUser()?.id_authentication);
   public authStatus = computed(() => this._authStatus())
 
   private _isAuthenticated = new BehaviorSubject<boolean>(false);
@@ -36,8 +36,8 @@ export class AuthService {
     }
   }
 
-  private setAuthentication(user: User|null, token: any): boolean {
-    this._currentUser.set(user);
+  private setAuthentication(user: string|null, token: any): boolean {
+    // this._currentUser.set(user);
     this._authStatus.set(AuthStatus.authenticated);
     localStorage.setItem('token', token);
     this._isAuthenticated.next(true);
@@ -45,14 +45,16 @@ export class AuthService {
   }
 
   login(username: string, password: string): Observable<any> {
-    const url = `${this.baseUrl}/auth/login`
-    const body = { username, password }
-    
+    const url = `${this.baseUrl}/auth/login`;
+    const body = { username, password };
+  
     return this.request(url, body).pipe(
-      tap((response) => {
-        localStorage.setItem('idAuth', response.body.id_authentication.toString());
-      }),
-      map(() => this._isAuthenticated.next(true))
+      map((response) => {
+        const idAuth = response.body?.id_authentication;
+        localStorage.setItem('idAuth', idAuth.toString());
+        this._isAuthenticated.next(true);
+        return response;
+      })
     );
   }
 
@@ -65,7 +67,7 @@ export class AuthService {
   private request(url: string, body: any): Observable<any> {
     return this.httpClient.post<LoginResponse>(url, body).pipe(
       map((response) => {
-        this.setAuthentication(response.body.user, response.body.token);
+        this.setAuthentication(response.body.username, response.body.token);
         return response;
       }),
       catchError((err) => {
@@ -82,7 +84,7 @@ export class AuthService {
       .set('Content-Type', 'application/json')
     return this.httpClient.get<LoginResponse>(url, { headers })
       .pipe(
-          map((response) => this.setAuthentication(response.body.user, response.body.token)),
+          map((response) => this.setAuthentication(response.body.username, response.body.token)),
           catchError(() => {
               this._authStatus.set(AuthStatus.notAuthenticated)
               return of(false)
@@ -93,7 +95,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('idAuth');
-    this._currentUser.set(null);
+    // this._currentUser.set(null);
     this._authStatus.set(AuthStatus.notAuthenticated);
     this.router.navigateByUrl('/login');
   }

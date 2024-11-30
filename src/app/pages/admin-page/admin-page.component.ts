@@ -18,6 +18,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { DiasCellRendererComponent } from '../../components/dias-cell-renderer/dias-cell-renderer.component';
 import { ModalComponent } from '../../components/modal/modal.component';
 import { CounterService } from '../../services/counter/counter.service';
+import { environments } from '../../../assets/environment';
 
 @Component({
   selector: 'app-admin-page',
@@ -41,7 +42,6 @@ export class AdminPageComponent{
   pagination = true;
   paginationPageSize = 10;
   paginationPageSizeSelector = [10, 20, 50, 100];
-  idEmpresa = 1;
   displayFilterRow = false;
   showModal: boolean = false;
   showProcesarModal: boolean = false;
@@ -215,7 +215,7 @@ export class AdminPageComponent{
   }
 
   agregarPremio(data: Premio): void {
-    this.premiosService.postPremio(this.idEmpresa, data).subscribe({
+    this.premiosService.postPremio(data).subscribe({
       next: (respuesta) => {
         this.premiosService.clearCache();
         console.log('Agregado con exito!', respuesta)
@@ -236,7 +236,7 @@ export class AdminPageComponent{
   }
 
   loadData() {
-    this.premiosService.getPremios(this.idEmpresa).subscribe({
+    this.premiosService.getPremios().subscribe({
       next: (data) => {
         this.gridApi?.setGridOption('rowData', data.body);
       },
@@ -254,8 +254,8 @@ export class AdminPageComponent{
       return;
     }
     
-    this.premiosService.putPrize(this.idEmpresa, event.data).subscribe({
-      next: (response) => {
+    this.premiosService.putPrize(event.data).subscribe({
+      next: () => {
         this.premiosService.clearCache();
         this.loadData();
       },
@@ -270,7 +270,7 @@ export class AdminPageComponent{
       let alertRow = this.gridApi.getRowNode(rowId.toString());
 
       if (alertRow) {
-        this.premiosService.deleteRow(this.idEmpresa, rowId).subscribe({
+        this.premiosService.deleteRow(rowId).subscribe({
           next: (respuesta) => {
             this.premiosService.clearCache();
             console.log('Eliminado con exito!', respuesta)

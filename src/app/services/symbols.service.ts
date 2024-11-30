@@ -14,12 +14,16 @@ export class SymbolsService {
   symbolMaxSpins: { [symbol: string]: number } = {};
   private readonly baseUrl: string = environments.BASE_URL
 
-  constructor(private http: HttpClient, private premiosService: PremiosService) {
+  constructor(
+    private http: HttpClient,
+    private premiosService: PremiosService
+  ) {
     this.loadSymbols();
   }
 
   private loadSymbols(): void {
-    this.premiosService.getPremios(1).subscribe({
+    const estacionID = parseInt(localStorage.getItem('idAuth') || '', 10);
+    this.premiosService.getPremios(estacionID).subscribe({
       next: (response) => {
         if (response.error) {
           console.error('Error al obtener premios');
