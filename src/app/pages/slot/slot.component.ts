@@ -16,7 +16,7 @@ import { CounterService } from '../../services/counter/counter.service';
 @Component({
   selector: 'app-slot',
   standalone: true,
-  imports: [NgFor, ReelComponent, RouterOutlet, NgClass],
+  imports: [ReelComponent, RouterOutlet, NgClass],
   templateUrl: './slot.component.html',
   styleUrls: ['./slot.component.css'],
   changeDetection: ChangeDetectionStrategy.Default,

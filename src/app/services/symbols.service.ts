@@ -9,7 +9,6 @@ import { Premio } from '../interfaces/premio';
   providedIn: 'root',
 })
 export class SymbolsService {
-  estacionID: number = environments.ID_ESTACION;
   totalSpinCount: number = 0;
   symbols: string[] = [];
   symbolMaxSpins: { [symbol: string]: number } = {};
@@ -23,7 +22,8 @@ export class SymbolsService {
   }
 
   private loadSymbols(): void {
-    this.premiosService.getPremios(this.estacionID).subscribe({
+    const estacionID = parseInt(localStorage.getItem('idAuth') || '', 10);
+    this.premiosService.getPremios(estacionID).subscribe({
       next: (response) => {
         if (response.error) {
           console.error('Error al obtener premios');

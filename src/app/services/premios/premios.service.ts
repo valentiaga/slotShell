@@ -16,11 +16,12 @@ export class PremiosService {
   constructor(private util: UtilService) {}
 
   getPremios(estacionID?: number): Observable<PremioResponse> {
-    if (this.premiosCache) {
-      return of(this.premiosCache);
+    let url = `${this.baseUrl}/prizes`;
+
+    if (estacionID) {
+      url += `?tenantId=${estacionID}`;
     }
-  
-    const url = `${this.baseUrl}/prizes/${estacionID}`;
+    
     return this.util.buildRequest<PremioResponse>('get', url).pipe(
       tap((premios) => this.premiosCache = premios)
     );
