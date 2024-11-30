@@ -3,12 +3,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
+  OnInit,
   QueryList,
   ViewChildren,
 } from '@angular/core';
 import { SymbolsService } from '../../services/symbols.service';
 import { ReelComponent } from '../../components/reel/reel.component';
-import { RouterOutlet } from '@angular/router';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { SocketService } from '../../services/socket/socket.service';
 import { CounterService } from '../../services/counter/counter.service';
 
@@ -20,8 +21,9 @@ import { CounterService } from '../../services/counter/counter.service';
   styleUrls: ['./slot.component.css'],
   changeDetection: ChangeDetectionStrategy.Default,
 })
-export class SlotComponent {
-  @ViewChildren(ReelComponent) reels!: QueryList<ReelComponent>; //Agarra todos los Reels que contiene
+export class SlotComponent implements OnInit{
+  @ViewChildren(ReelComponent) reels!: QueryList<ReelComponent>;
+  estacionId!: number;
   randomSymbols: string[] = ['', '', ''];
   spinning: boolean[] = new Array<boolean>(3).fill(false);
   totalSpinCount: number = 0;
@@ -29,14 +31,40 @@ export class SlotComponent {
   back?: HTMLAudioElement;
   win?: HTMLAudioElement;
   socketService = inject(SocketService);
-  estacion: string = '';
+  isla: string = '';
 
-  constructor(private symbolsService: SymbolsService, private counterService: CounterService) {}
+  constructor(private symbolsService: SymbolsService, private counterService: CounterService, private route: ActivatedRoute) {}
 
   async ngOnInit() {
+    this.setEstacion();
+    this.loadSymbols();
+    this.createSocket();
+  }
+
+  loadSymbols(){
     this.back = document.getElementById('audio_back') as HTMLAudioElement;
     this.win = document.getElementById('audio_win') as HTMLAudioElement;
     this.initialRandomSymbols();
+  }
+
+  setEstacion() {
+    this.estacionId = this.route.snapshot.data['id'];
+    switch (this.estacionId) {
+      case 1:
+        console.log('Estación Garay seleccionada');
+        break;
+      case 2:
+        console.log('Estación Matheu seleccionada');
+        break;
+      case 3:
+        console.log('Estación Roca seleccionada');
+        break;
+      default:
+        console.log('Estación no válida');
+    }
+  }
+
+  createSocket() {
     // await this.socketService.connectToRaspberryPi();
     this.socketService.onPinChange().subscribe(data => {
       console.log('Cambia el pin!', data); 
@@ -45,13 +73,13 @@ export class SlotComponent {
       }
       switch(data.pin){
         case 13:
-          this.estacion = 'Estacion 1';
+          this.isla = 'Isla 1';
         break;
         case 26:
-          this.estacion = 'Estacion 2';
+          this.isla = 'Isla 2';
         break;
         case 19:
-          this.estacion = 'Estacion 3';
+          this.isla = 'Isla 3';
         break;
       }
     });

@@ -9,17 +9,21 @@ import { Premio } from '../interfaces/premio';
   providedIn: 'root',
 })
 export class SymbolsService {
+  estacionID: number = environments.ID_ESTACION;
   totalSpinCount: number = 0;
   symbols: string[] = [];
   symbolMaxSpins: { [symbol: string]: number } = {};
   private readonly baseUrl: string = environments.BASE_URL
 
-  constructor(private http: HttpClient, private premiosService: PremiosService) {
+  constructor(
+    private http: HttpClient,
+    private premiosService: PremiosService
+  ) {
     this.loadSymbols();
   }
 
   private loadSymbols(): void {
-    this.premiosService.getPremios(1).subscribe({
+    this.premiosService.getPremios(this.estacionID).subscribe({
       next: (response) => {
         if (response.error) {
           console.error('Error al obtener premios');

@@ -13,14 +13,13 @@ export class CounterService {
   private readonly baseUrl: string = environments.BASE_URL
   private _counter: WritableSignal<number> = signal(0);
   public counter = computed(() => this._counter())
-  private idEmpresa = environments.ID_EMPRESA;
 
   constructor(private http: HttpClient, private util: UtilService) {
-    this.getCounter(this.idEmpresa).subscribe();
+    this.getCounter().subscribe();
   }
 
-  getCounter(id_empresa: number): Observable<number> {  
-    const url = `${this.baseUrl}/counters/id_authentication/${id_empresa}`;
+  getCounter(): Observable<number> {  
+    const url = `${this.baseUrl}/counters`;
     return this.util.buildRequest<CounterResponse>('get', url).pipe(
       tap((response) => this._counter.set(response.body.counter)),
       map((response) => response.body.counter)
