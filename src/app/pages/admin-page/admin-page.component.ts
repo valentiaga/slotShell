@@ -18,7 +18,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { DiasCellRendererComponent } from '../../components/dias-cell-renderer/dias-cell-renderer.component';
 import { ModalComponent } from '../../components/modal/modal.component';
 import { CounterService } from '../../services/counter/counter.service';
-import { environments } from '../../../assets/environment';
+import { NgxUiLoaderModule } from 'ngx-ui-loader';
 
 @Component({
   selector: 'app-admin-page',
@@ -32,7 +32,8 @@ import { environments } from '../../../assets/environment';
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
-    ModalComponent
+    ModalComponent,
+    NgxUiLoaderModule
   ],
   templateUrl: './admin-page.component.html',
   styleUrl: './admin-page.component.css',

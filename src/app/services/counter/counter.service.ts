@@ -11,7 +11,7 @@ import { map, Observable } from 'rxjs';
 export class CounterService {
   private readonly baseUrl: string = environments.BASE_URL;
   // Signal to store the counter value
-  private counterSignal: WritableSignal<number> = signal(0);  // Default value 0
+  private counterSignal: WritableSignal<number> = signal(0);
 
   constructor(private http: HttpClient, private util: UtilService) {}
 
