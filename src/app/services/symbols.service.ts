@@ -4,6 +4,7 @@ import { environments } from '../../assets/environment';
 import { HttpClient } from '@angular/common/http';
 import { PremiosService } from './premios/premios.service';
 import { Premio } from '../interfaces/premio';
+import { CounterService } from './counter/counter.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,10 +14,12 @@ export class SymbolsService {
   symbols: string[] = [];
   symbolMaxSpins: { [symbol: string]: number } = {};
   private readonly baseUrl: string = environments.BASE_URL
+  globalCounterValue = -1;
 
   constructor(
     private http: HttpClient,
-    private premiosService: PremiosService
+    private premiosService: PremiosService,
+    private counterService: CounterService
   ) {}
 
   loadSymbols(estacionID: number): void {
@@ -40,14 +43,14 @@ export class SymbolsService {
   }
 
   checkTargetSymbol(): string | null {
-    this.totalSpinCount > 99 ? 1 : this.totalSpinCount++;
-  
+    this.globalCounterValue = this.counterService.getCounter()();
+    
     // Filtrar símbolos que cumplen con la condición de spins
     const validSymbols = this.symbols.filter((symbol) => {
-      return this.totalSpinCount % this.symbolMaxSpins[symbol] === 0;
+      const maxSpins = this.symbolMaxSpins[symbol];
+      return maxSpins > 0 && this.globalCounterValue % maxSpins === 0;
     });
   
-    // Si no hay símbolos válidos, retornar null
     if (validSymbols.length === 0) {
       return null;
     }

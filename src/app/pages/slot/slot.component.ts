@@ -36,7 +36,8 @@ export class SlotComponent implements OnInit{
   constructor(private symbolsService: SymbolsService, private counterService: CounterService, private route: ActivatedRoute) {}
 
   async ngOnInit() {
-    this.setEstacion();
+    this.counterService.getCounter();
+    await this.setEstacion();
     this.loadSymbols();
     this.createSocket();
   }
@@ -48,8 +49,9 @@ export class SlotComponent implements OnInit{
     this.initialRandomSymbols();
   }
 
-  setEstacion() {
+  async setEstacion() {
     this.estacionID = this.route.snapshot.data['id'];
+    localStorage.setItem('idAuth', this.estacionID.toString());
     switch (this.estacionID) {
       case 1:
         console.log('Estación Garay seleccionada');
