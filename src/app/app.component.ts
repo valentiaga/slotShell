@@ -5,11 +5,12 @@ import { HttpClientModule } from '@angular/common/http';
 import { HeaderComponent } from './components/header/header.component';
 import { AuthStatus } from './interfaces';
 import { AuthService } from './services/auth/auth.service';
+import { NgxUiLoaderModule } from 'ngx-ui-loader';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, SlotComponent, HttpClientModule, HeaderComponent],
+  imports: [RouterOutlet, HttpClientModule, HeaderComponent, NgxUiLoaderModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
