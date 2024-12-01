@@ -1,7 +1,7 @@
 import { CommonModule, NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AgGridAngular, AgGridModule } from 'ag-grid-angular';
 import { PremiosService } from '../../services/premios/premios.service';
 import { Premio } from '../../interfaces/premio';
@@ -187,7 +187,8 @@ export class AdminPageComponent implements OnInit{
 
   constructor(
     public premiosService: PremiosService,
-    public counterService: CounterService
+    public counterService: CounterService,
+    private router: Router
   ) {}
 
   public getRowId: GetRowIdFunc = (params: GetRowIdParams) => {
@@ -296,4 +297,27 @@ export class AdminPageComponent implements OnInit{
   closeModalFormula() {
     this.showFormulaModal = false;
   }
+
+  redirect() {
+    const idAuth = localStorage.getItem('idAuth');
+    
+    if (idAuth) {
+      switch (idAuth) {
+        case '1':
+          this.router.navigate(['/garay']);
+          break;
+        case '2':
+          this.router.navigate(['/matheu']);
+          break;
+        case '3':
+          this.router.navigate(['/roca']);
+          break;
+        default:
+          console.warn('idAuth no válido');
+          break;
+      }
+    } else {
+      console.warn('idAuth no encontrado en localStorage');
+    }
+  }  
 }
