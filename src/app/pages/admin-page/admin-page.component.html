@@ -1,6 +1,6 @@
-<!-- <div ngxUiLoaderBlurred [loaderId]="'loader-01'">
+<div ngxUiLoaderBlurred [loaderId]="'loader-01'">
   <ngx-ui-loader></ngx-ui-loader>
-</div> -->
+</div>
 <main>
     <div class="container mx-auto text-gray-800">
         <h1 class="text-4xl mb-4">PREMIOS</h1>
@@ -39,4 +39,4 @@
     </div>
   </main>
   
-  <app-modal *ngIf="showModal" (formSubmit)="handleFormSubmit($event)" (close)="closeModal()"></app-modal>
+  <app-modal *ngIf="showModal" [existingPrizes]="rowData" (formSubmit)="handleFormSubmit($event)" (close)="closeModal()"></app-modal>

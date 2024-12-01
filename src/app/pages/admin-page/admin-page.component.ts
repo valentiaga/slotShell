@@ -207,6 +207,7 @@ export class AdminPageComponent implements OnInit{
   loadData() {
     this.premiosService.getPremios().subscribe({
       next: (data) => {
+        this.rowData = data.body;
         this.gridApi?.setGridOption('rowData', data.body);
       },
       error: (error) => {

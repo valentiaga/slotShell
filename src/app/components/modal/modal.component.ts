@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { NgClass} from '@angular/common';
+import { NgClass, NgIf} from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DiasCellRendererComponent } from '../dias-cell-renderer/dias-cell-renderer.component';
 
 @Component({
   selector: 'app-modal',
   standalone: true,
-  imports: [NgClass, FormsModule, DiasCellRendererComponent],
+  imports: [NgIf, NgClass, FormsModule, DiasCellRendererComponent],
   templateUrl: './modal.component.html',
   styleUrl: './modal.component.css'
 })
@@ -14,10 +14,10 @@ export class ModalComponent {
   @Output() close = new EventEmitter();
   @Output() formSubmit = new EventEmitter<any>();
   @Output() addFormula = new EventEmitter<any>();
-  @Input() isToggled: boolean = false;
+  @Input() existingPrizes: any[] = [];
+  isSpinDuplicate = false;
+  id_prize = -1;
   isChecked = true;
-  showFileInput = false;
-  displayDisabled = false;
   formData: { [key: string]: any } = {
     title: '',
     amount: '',
@@ -30,14 +30,14 @@ export class ModalComponent {
     active_days: '1111111'
   };
 
-  toggleFileInput() {
-    this.showFileInput = !this.showFileInput;
-    this.displayDisabled = !this.displayDisabled;
+  onSubmit(form: any) {
+    this.formSubmit.emit(this.formData);
   }
 
-  onSubmit(form: any) {
-    console.log(this.formData);
-    this.formSubmit.emit(this.formData);
+  validateSpins(spins: number) {
+    const duplicatePrize = this.existingPrizes.find((premio) => premio.spins === spins);
+    this.isSpinDuplicate = !!duplicatePrize;
+    this.id_prize = duplicatePrize ? duplicatePrize.id_prize : null;
   }
 
   onSelectedDays(selectedDays: any) {    
@@ -49,7 +49,11 @@ export class ModalComponent {
   }
 
   get isFormValid(): boolean {
-    return this.formData['title'] && this.formData['amount'] && this.formData['display'] && this.formData['spins'];
+    return this.formData['title'] 
+      && this.formData['amount'] 
+      && this.formData['display'] 
+      && this.formData['spins']
+      && !this.isSpinDuplicate;
   }
 
   onCheckboxChange(event: Event, key: string) {
