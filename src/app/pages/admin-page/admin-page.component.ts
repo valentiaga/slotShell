@@ -19,6 +19,9 @@ import { DiasCellRendererComponent } from '../../components/dias-cell-renderer/d
 import { ModalComponent } from '../../components/modal/modal.component';
 import { CounterService } from '../../services/counter/counter.service';
 import { NgxUiLoaderModule } from 'ngx-ui-loader';
+import { ToastService } from '../../services/toast/toast.service';
+import { IsActiveCellRendererComponent } from '../../components/is-active-cell-renderer/is-active-cell-renderer.component';
+import { DeleteButtonCellRendererComponent } from '../../components/delete-button-cell-renderer/delete-button-cell-renderer.component';
 
 @Component({
   selector: 'app-admin-page',
@@ -45,13 +48,10 @@ export class AdminPageComponent implements OnInit{
   paginationPageSizeSelector = [10, 20, 50, 100];
   displayFilterRow = false;
   showModal: boolean = false;
-  showProcesarModal: boolean = false;
-  showFormulaModal: boolean = false;
   themeClass = 'ag-theme-quartz-dark';
   private gridApi: GridApi<any> | undefined;
   rowData: Premio[] = [];
-  counterSignal = this.counterService.getCounter();  // Get the signal
-
+  counterSignal = this.counterService.getCounter();
 
   colDefs: ColDef[] = [
     {
@@ -108,29 +108,10 @@ export class AdminPageComponent implements OnInit{
       editable: false,
       filter: "agTextColumnFilter",
       floatingFilter: this.displayFilterRow,
-      cellRenderer: (params: ICellRendererParams) => {
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.checked = params.value;
-      
-        checkbox.addEventListener('change', () => {
-          const newValue = checkbox.checked;
-          if (params.colDef?.field) {
-            params.data[params.colDef.field] = newValue;
-            params.api.refreshCells({ rowNodes: [params.node], force: true });
-      
-            this.onCellValueChanged({
-              data: params.data,
-              colDef: params.colDef,
-              rowIndex: params.data.id_prize,
-              oldValue: params.value,
-              newValue: newValue,
-            } as CellValueChangedEvent);
-          }
-        });
-      
-        return checkbox;
-      },
+      cellRenderer: IsActiveCellRendererComponent,
+      cellRendererParams: {
+        context: { componentParent: this },
+      }
     },
     {
       headerName: 'Días',
@@ -170,46 +151,30 @@ export class AdminPageComponent implements OnInit{
       floatingFilter: this.displayFilterRow,
     },
     {
+      headerName: 'Acciones',
       width: 60,
-      cellRenderer: (params: ICellRendererParams) => {
-        const rowId = params.data.id_prize;
-        const button = document.createElement('button');
-        button.innerHTML = `<img src="/assets/svg/delete.svg" alt="Delete" style="width: 24px; height: 24px;">`;
-        button.addEventListener('click', () => {
+      cellRenderer: DeleteButtonCellRendererComponent,
+      cellRendererParams: {
+        onDelete: (rowId: number) => {
           this.deleteRow(rowId);
-        });
-        return button;
+        },
       },
       filter: false,
       sortable: false,
       editable: false,
-    },
+    }
   ];
 
   constructor(
     public premiosService: PremiosService,
     public counterService: CounterService,
-    private router: Router
+    private router: Router,
+    private toastService: ToastService
   ) {}
 
   public getRowId: GetRowIdFunc = (params: GetRowIdParams) => {
     return params.data.id_prize.toString();
   };
-
-  showFloatingFilters() {
-    // this.displayFilterRow = !this.displayFilterRow;
-
-    // if (!this.displayFilterRow) {
-    //     this.gridApi?.setFilterModel({});
-    // }
-
-    // this.colDefs.forEach(colDef => {
-    //   colDef.floatingFilter = this.displayFilterRow;
-    // });
-
-    // this.gridApi?.setGridOption('columnDefs', this.colDefs);
-    // this.gridApi?.refreshHeader();
-  }
 
   handleFormSubmit(formData: any) {
     console.log('Recibo los datos! ', formData);
@@ -219,13 +184,13 @@ export class AdminPageComponent implements OnInit{
 
   agregarPremio(data: Premio): void {
     this.premiosService.postPremio(data).subscribe({
-      next: (respuesta) => {
+      next: () => {
+        this.toastService.showToast('success', 'Premio agregado con éxito.');
         this.premiosService.clearCache();
-        console.log('Agregado con exito!', respuesta)
         this.loadData();
       },
-      error: (error) => {
-        console.error('Error al agregar el premio:', error);
+      error: () => {
+        this.toastService.showToast('error', 'Ocurrió un error al agregar el premio.');
       }
     });
   }
@@ -245,10 +210,8 @@ export class AdminPageComponent implements OnInit{
         this.gridApi?.setGridOption('rowData', data.body);
       },
       error: (error) => {
+        this.toastService.showToast('error', 'Ocurrió un error al obtener los premios.');
         console.error('Error al obtener datos:', error);
-      },
-      complete: () => {
-        console.log('Datos cargados exitosamente');
       }
     });
   }
@@ -260,27 +223,31 @@ export class AdminPageComponent implements OnInit{
     
     this.premiosService.putPrize(event.data).subscribe({
       next: () => {
+        this.toastService.showToast('success', 'Premio actualizado con éxito.');
         this.premiosService.clearCache();
         this.loadData();
       },
       error: (error) => {
-        console.error('Error al agregar el premio:', error);
+        this.toastService.showToast('error', 'Ocurrió un error al modificar el premio.');
+        console.error('Error al modificar el premio:', error);
       }
     });
   }
 
   deleteRow = (rowId: number) => {
     if (this.gridApi) {
-      let alertRow = this.gridApi.getRowNode(rowId.toString());
+      const rowNode = this.gridApi.getRowNode(rowId.toString());
 
-      if (alertRow) {
+      if (rowNode) {
+        
         this.premiosService.deleteRow(rowId).subscribe({
-          next: (respuesta) => {
+          next: () => {
+            this.gridApi?.applyTransaction({ remove: [rowNode.data] });
             this.premiosService.clearCache();
-            console.log('Eliminado con exito!', respuesta)
-            this.loadData();
+            this.toastService.showToast('success', 'Premio eliminado con éxito.');
           },
           error: (error) => {
+            this.toastService.showToast('error', 'Ocurrió un error al eliminar el premio.');
             console.error('Error al eliminar el premio:', error);
           }
         });
@@ -288,15 +255,10 @@ export class AdminPageComponent implements OnInit{
         console.warn(`No se encontró ninguna fila con id ${rowId}`);
       }
     }
-  }
+  };  
 
   closeModal() {
     this.showModal = false;
-    this.showProcesarModal = false;
-  }
-
-  closeModalFormula() {
-    this.showFormulaModal = false;
   }
 
   redirect() {

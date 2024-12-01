@@ -1,18 +1,16 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ModalContent } from '../../interfaces/modal';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass} from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DiasCellRendererComponent } from '../dias-cell-renderer/dias-cell-renderer.component';
 
 @Component({
   selector: 'app-modal',
   standalone: true,
-  imports: [NgIf, NgClass, NgFor, FormsModule, DiasCellRendererComponent],
+  imports: [NgClass, FormsModule, DiasCellRendererComponent],
   templateUrl: './modal.component.html',
   styleUrl: './modal.component.css'
 })
 export class ModalComponent {
-  @Input() showFormulaButton: boolean = false;
   @Output() close = new EventEmitter();
   @Output() formSubmit = new EventEmitter<any>();
   @Output() addFormula = new EventEmitter<any>();
