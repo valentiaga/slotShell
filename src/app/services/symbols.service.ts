@@ -42,13 +42,11 @@ export class SymbolsService {
     return this.symbols[randomIndex];
   }
 
-  checkTargetSymbol(): string | null {
-    this.globalCounterValue = this.counterService.getCounter()();
-    
+  checkTargetSymbol(globalCounterValue: number): string | null {    
     // Filtrar símbolos que cumplen con la condición de spins
     const validSymbols = this.symbols.filter((symbol) => {
       const maxSpins = this.symbolMaxSpins[symbol];
-      return maxSpins > 0 && this.globalCounterValue % maxSpins === 0;
+      return maxSpins > 0 && globalCounterValue % maxSpins === 0;
     });
   
     if (validSymbols.length === 0) {

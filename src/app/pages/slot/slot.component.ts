@@ -102,20 +102,36 @@ export class SlotComponent implements OnInit{
   }
 
   generateRandomSymbols() {
+    let globalCounterValue = 0;
     this.counterService.incrementCounter(this.estacionID).subscribe({
-      next: () => {
-        console.log('El contador fue incrementado correctamente');
+      next: (response) => {
+        globalCounterValue = response.body.globalCounterValue;
+        this.spinning.fill(true);
+        this.targetSymbol = this.symbolsService.checkTargetSymbol(globalCounterValue);
+        let symbols: any = [];
+
+        if (this.targetSymbol === null) {
+          do {
+            symbols = [
+              this.symbolsService.getRandomSymbol(),
+              this.symbolsService.getRandomSymbol(),
+              this.symbolsService.getRandomSymbol()
+            ];
+          } while (symbols[0] === symbols[1] && symbols[1] === symbols[2]);
+        } else {
+          // Si targetSymbol no es null, lo usamos para los tres
+          symbols = [this.targetSymbol, this.targetSymbol, this.targetSymbol];
+        }
+        
+        this.back?.play();
+        this.win?.pause();
+        this.reels.forEach((reel, index) => {
+          reel.startSpinning(symbols[index]);  // Le pasamos el símbolo correspondiente a cada reel
+        });
       },
       error: (err) => {
         console.error('Hubo un error al incrementar el contador:', err);
       }
-    });
-    this.spinning.fill(true);
-    this.targetSymbol = this.symbolsService.checkTargetSymbol();
-    this.back?.play();
-    this.win?.pause();
-    this.reels.forEach((reel, index) => {
-      reel.startSpinning();
     });
   }
 

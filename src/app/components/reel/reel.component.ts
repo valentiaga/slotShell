@@ -25,7 +25,7 @@ export class ReelComponent {
 
   constructor(private symbolsService: SymbolsService) {}
 
-  startSpinning() {
+  startSpinning(symbol: string) {
     this.spinning = true;
     this.blink = false;
     let intervalTime = 100;  // Tiempo inicial del intervalo (rápido al principio)
@@ -56,6 +56,7 @@ export class ReelComponent {
   
     setTimeout(() => {
       console.log('ejecuto', this.duration);
+      this.currentSymbol = symbol;
       this.stopSpinning();
     }, this.duration);
   }
@@ -64,9 +65,6 @@ export class ReelComponent {
     let audio = document.getElementById('audio_stop') as HTMLAudioElement;
     audio.play();
     clearInterval(this.intervalId);
-    if (this.targetSymbol) {
-      this.currentSymbol = this.targetSymbol;
-    }
     this.spinning = false;
   
     // Obtiene el contenedor de símbolos específico
