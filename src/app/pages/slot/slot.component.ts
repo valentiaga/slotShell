@@ -36,8 +36,8 @@ export class SlotComponent implements OnInit{
   constructor(private symbolsService: SymbolsService, private counterService: CounterService, private route: ActivatedRoute) {}
 
   async ngOnInit() {
-    this.counterService.getCounter();
     await this.setEstacion();
+    this.counterService.getCounter();
     this.loadSymbols();
     this.createSocket();
   }

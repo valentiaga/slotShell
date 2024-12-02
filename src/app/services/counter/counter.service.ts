@@ -24,7 +24,7 @@ export class CounterService {
     }
 
     const url = `${this.baseUrl}/counters/id_authentication/${idAuth}`;
-    this.util.buildRequest<CounterResponse>('get', url).pipe(
+    this.util.buildRequest<CounterResponse>('get', url,{}, false).pipe(
       map((response) => {
         this.counterSignal.set(response.body.counter);  // Update the signal with the response
       })

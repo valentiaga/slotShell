@@ -16,3 +16,7 @@
 .add-button {
     background-color: rgb(46, 120, 101);
 }
+
+.ag-body-horizontal-scroll.ag-scrollbar-invisible {
+    pointer-events: all !important;
+} 
