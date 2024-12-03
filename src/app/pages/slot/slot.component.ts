@@ -110,7 +110,7 @@ export class SlotComponent implements OnInit{
         this.targetSymbol = this.symbolsService.checkTargetSymbol(globalCounterValue);
         let symbols: any = [];
 
-        if (this.targetSymbol === null) {
+        if (this.targetSymbol === null && this.symbolsService.hasSymbols()) {
           do {
             symbols = [
               this.symbolsService.getRandomSymbol(),

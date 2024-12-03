@@ -67,6 +67,10 @@ export class SymbolsService {
   
     return targetSymbol;
   }
+
+  public hasSymbols(): boolean {
+    return this.symbols.length > 0;
+  }
   
 
   private updateSymbolsAndSpins(premios: Premio[]): void {
@@ -91,7 +95,7 @@ export class SymbolsService {
   
     const filteredPremios = premios.filter(isValidPremio);
       this.symbols = filteredPremios.map((premio: Premio) => premio.display); 
-  
+    
     this.symbolMaxSpins = filteredPremios.reduce((acc: { [key: string]: number }, premio: Premio) => {
       acc[premio.display] = premio.spins;
       return acc;
