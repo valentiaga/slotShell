@@ -71,28 +71,22 @@ export class SlotComponent implements OnInit{
     this.socketService.joinRoom(this.estacionID.toString());
 
     // Escuchar el evento para accionar la ruleta
-    this.socketService.onRuletaAccionada((message: string) => {
-      console.log(message);
-      this.generateRandomSymbols();
-    });
-    // await this.socketService.connectToRaspberryPi();
-    // this.socketService.onPinChange().subscribe(data => {
-    //   console.log('Cambia el pin!', data); 
-    //   if (data.state === "HIGH"){
-    //     this.generateRandomSymbols()
-    //   }
-    //   switch(data.pin){
-    //     case 13:
-    //       this.isla = 'Isla 1';
-    //     break;
-    //     case 26:
-    //       this.isla = 'Isla 2';
-    //     break;
-    //     case 19:
-    //       this.isla = 'Isla 3';
-    //     break;
-    //   }
-    // });
+    this.socketService.onRuletaAccionada((data) => {
+      console.log(data);
+      if (data.state === "HIGH"){
+        this.generateRandomSymbols()
+      }
+      switch(data.pin){
+        case 13:
+          this.isla = 'Isla 1';
+        break;
+        case 26:
+          this.isla = 'Isla 2';
+        break;
+        case 19:
+          this.isla = 'Isla 3';
+        break;
+    }});
   }
 
   initialRandomSymbols() {

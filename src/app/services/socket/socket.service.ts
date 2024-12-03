@@ -24,10 +24,10 @@ export class SocketService {
   }
 
   // Escuchar eventos de "accionarRuleta"
-  onRuletaAccionada(callback: (message: string) => void): void {
+  onRuletaAccionada(callback: (data: any) => void): void {
     this.socket.on('accionarRuleta', callback);
-    this.socket.on('testMessage', (message) => {
-      console.log('Mensaje recibido:', message);
+    this.socket.on('testMessage', (data) => {
+      console.log('Mensaje recibido:', data);
     });
   }
 
