@@ -55,7 +55,6 @@ export class ReelComponent {
     }, intervalTime);
   
     setTimeout(() => {
-      console.log('ejecuto', this.duration);
       this.currentSymbol = symbol;
       this.stopSpinning();
     }, this.duration);

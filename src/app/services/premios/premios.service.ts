@@ -37,9 +37,7 @@ export class PremiosService {
       url += `&tenantId=${estacionID}`;
     }
   
-    return this.util.buildRequest<PremioResponse>('get', url).pipe(
-      tap((premios) => console.log('PREMIOS ACTIVOS: ', premios))
-    );
+    return this.util.buildRequest<PremioResponse>('get', url);
   }
   
   postPremio(nuevoPremio: Premio): Observable<any> {
