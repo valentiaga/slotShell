@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, tap } from 'rxjs';
+import { map, Observable, of, tap } from 'rxjs';
 import { environments } from '../../assets/environment';
 import { HttpClient } from '@angular/common/http';
 import { PremiosService } from './premios/premios.service';
@@ -15,27 +15,13 @@ export class SymbolsService {
   symbolMaxSpins: { [symbol: string]: number } = {};
   private readonly baseUrl: string = environments.BASE_URL
   globalCounterValue = -1;
+  activePrizes: Premio[] = [];
 
   constructor(
     private http: HttpClient,
     private premiosService: PremiosService,
     private counterService: CounterService
   ) {}
-
-  loadSymbols(estacionID: number): void {
-    this.premiosService.getPremios(estacionID).subscribe({
-      next: (response) => {
-        if (response.error) {
-          console.error('Error al obtener premios');
-        } else {          
-          this.updateSymbolsAndSpins(response.body);
-        }
-      },
-      error: (error) => {
-        console.error('Error al obtener premios:', error);
-      }
-    });
-  }
 
   getRandomSymbol(): string {
     const randomIndex = Math.floor(Math.random() * this.symbols.length);
@@ -68,37 +54,28 @@ export class SymbolsService {
     return targetSymbol;
   }
 
-  public hasSymbols(): boolean {
-    return this.symbols.length > 0;
+  public hasEnoughPrizes(): boolean {
+    return this.activePrizes.length >= 3;
   }
   
 
-  private updateSymbolsAndSpins(premios: Premio[]): void {
-    const now = new Date();
-    let currentDay = now.getDay();
-    currentDay = (currentDay === 0) ? 6 : currentDay - 1;
+  updateSymbolsAndSpins(estacionID: number): Observable<boolean> {
+    return this.premiosService.getActivePrizes(estacionID).pipe(
+      tap((response) => {
+        if (response.error) {
+          console.error('Error al obtener premios');
+        } else {
+          this.activePrizes = response.body;
+          this.symbols = this.activePrizes.map((premio: Premio) => premio.display);
   
-    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+          this.symbolMaxSpins = this.activePrizes.reduce((acc: { [key: string]: number }, premio: Premio) => {
+            acc[premio.display] = premio.spins;
+            return acc;
+          }, {});
+        }
+      }),
+      map(() => this.hasEnoughPrizes())
+    );
+  }
     
-    // Función para verificar si un premio es válido
-    const isValidPremio = (premio: Premio): boolean => {
-      // Verificar que el premio esté activo
-      if (!premio.is_active) return false;
-  
-      // Verificar que la hora actual esté entre start_time y end_time
-      if (currentTime < premio.start_time || currentTime > premio.end_time) return false;
-  
-      // Verificar si el día actual está activo según active_days
-      const activeDays = premio.active_days;
-      return activeDays[currentDay] === '1';
-    };
-  
-    const filteredPremios = premios.filter(isValidPremio);
-      this.symbols = filteredPremios.map((premio: Premio) => premio.display); 
-    
-    this.symbolMaxSpins = filteredPremios.reduce((acc: { [key: string]: number }, premio: Premio) => {
-      acc[premio.display] = premio.spins;
-      return acc;
-    }, {});
-  }  
 }

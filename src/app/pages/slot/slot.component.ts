@@ -45,7 +45,6 @@ export class SlotComponent implements OnInit{
   loadSymbols(){
     this.back = document.getElementById('audio_back') as HTMLAudioElement;
     this.win = document.getElementById('audio_win') as HTMLAudioElement;
-    this.symbolsService.loadSymbols(this.estacionID);
     this.initialRandomSymbols();
   }
 
@@ -72,8 +71,7 @@ export class SlotComponent implements OnInit{
 
     // Escuchar el evento para accionar la ruleta
     this.socketService.onRuletaAccionada((data) => {
-      console.log(data);
-      if (data.state === "HIGH"){
+      if (data.pinState === "LOW" && !this._isSpinning()){
         this.generateRandomSymbols()
       }
       switch(data.pin){
@@ -89,43 +87,61 @@ export class SlotComponent implements OnInit{
     }});
   }
 
-  initialRandomSymbols() {
-    for (let i = 0; i < 3; i++) {
-      this.randomSymbols[i] = this.symbolsService.getRandomSymbol();
-    }
+  private _isSpinning() {    
+    return this.spinning.some(reel => reel === true);
   }
 
-  generateRandomSymbols() {
-    let globalCounterValue = 0;
-    this.counterService.incrementCounter(this.estacionID).subscribe({
-      next: (response) => {
-        globalCounterValue = response.body.globalCounterValue;
-        this.spinning.fill(true);
-        this.targetSymbol = this.symbolsService.checkTargetSymbol(globalCounterValue);
-        let symbols: any = [];
-
-        if (this.targetSymbol === null && this.symbolsService.hasSymbols()) {
-          do {
-            symbols = [
-              this.symbolsService.getRandomSymbol(),
-              this.symbolsService.getRandomSymbol(),
-              this.symbolsService.getRandomSymbol()
-            ];
-          } while (symbols[0] === symbols[1] && symbols[1] === symbols[2]);
-        } else {
-          // Si targetSymbol no es null, lo usamos para los tres
-          symbols = [this.targetSymbol, this.targetSymbol, this.targetSymbol];
+  initialRandomSymbols() {
+    this.symbolsService.updateSymbolsAndSpins(this.estacionID).subscribe((hasEnough) => {
+      if (hasEnough) {
+        for (let i = 0; i < 3; i++) {
+          this.randomSymbols[i] = this.symbolsService.getRandomSymbol();
         }
-        
-        this.back?.play();
-        this.win?.pause();
-        this.reels.forEach((reel, index) => {
-          reel.startSpinning(symbols[index]);  // Le pasamos el símbolo correspondiente a cada reel
-        });
-      },
-      error: (err) => {
-        console.error('Hubo un error al incrementar el contador:', err);
+      } else {
+        alert('Asegúrese de tener al menos 3 premios activos');
       }
+    });
+  }
+  
+
+  generateRandomSymbols() {
+    this.symbolsService.updateSymbolsAndSpins(this.estacionID).subscribe((hasEnough) => {
+      if (!hasEnough) {
+        alert('Asegúrese de tener al menos 3 premios activos');
+        return;
+      }
+  
+      let globalCounterValue = 0;
+      this.counterService.incrementCounter(this.estacionID).subscribe({
+        next: (response) => {
+          globalCounterValue = response.body.globalCounterValue;
+          this.spinning.fill(true);
+          this.targetSymbol = this.symbolsService.checkTargetSymbol(globalCounterValue);
+          let symbols: any = [];
+  
+          if (this.targetSymbol === null) {
+            do {
+              symbols = [
+                this.symbolsService.getRandomSymbol(),
+                this.symbolsService.getRandomSymbol(),
+                this.symbolsService.getRandomSymbol()
+              ];
+            } while (symbols[0] === symbols[1] && symbols[1] === symbols[2]);
+          } else {
+            // Si targetSymbol no es null, lo usamos para los tres
+            symbols = [this.targetSymbol, this.targetSymbol, this.targetSymbol];
+          }
+  
+          this.back?.play();
+          this.win?.pause();
+          this.reels.forEach((reel, index) => {
+            reel.startSpinning(symbols[index]);  // Le pasamos el símbolo correspondiente a cada reel
+          });
+        },
+        error: (err) => {
+          console.error('Hubo un error al incrementar el contador:', err);
+        }
+      });
     });
   }
 
