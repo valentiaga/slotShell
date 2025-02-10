@@ -20,6 +20,8 @@ export class SocketService {
 
   // Método para unirse a un room
   joinRoom(room: string): void {
+    console.log("🚀 ~ SocketService ~ joinRoom ~ room:", room)
+    
     this.socket.emit('joinRoom', room);
   }
 
