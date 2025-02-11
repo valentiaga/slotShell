@@ -60,6 +60,11 @@ export class ReelComponent {
     }, this.duration);
   }
 
+  isImageUrl(url: string): boolean {
+    const regex = /\bprizes\/\b/;
+    return regex.test(url);
+  }
+
   stopSpinning() {
     let audio = document.getElementById('audio_stop') as HTMLAudioElement;
     audio.play();

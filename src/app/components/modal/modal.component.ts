@@ -60,6 +60,11 @@ export class ModalComponent implements OnInit {
     }
   }
 
+  toggleSelector() {
+    this.showImageSelector = !this.showImageSelector;
+    this.formData['display'] = ''; 
+  }
+
   clearSelection() {
     this.formData['display'] = ''; 
     this.selectedImageName = '';

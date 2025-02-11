@@ -35,8 +35,8 @@
             <div class="relative flex items-center">
               <input type="text" name="display" [(ngModel)]="formData['display']" id="display"
                 class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
-                readonly />
-              <button type="button" (click)="showImageSelector = !showImageSelector"
+                [attr.maxlength]="showImageSelector ? null : 4"/>
+              <button type="button" (click)="toggleSelector()"
                 class="ml-2 bg-gray-300 text-gray-700 px-4 py-2 rounded">
                 Seleccionar
               </button>

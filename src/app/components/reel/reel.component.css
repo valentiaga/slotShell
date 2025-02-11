@@ -32,6 +32,13 @@
   animation: stopShake 0.5s ease-in-out;
 }
 
+.symbol-image {
+  width: 60%;
+  margin: auto;
+  height: auto;
+  object-fit: contain;
+}
+
 @keyframes stopShake {
   0% { transform: translateY(0); }
   25% { transform: translateY(5px); }
