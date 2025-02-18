@@ -3,6 +3,7 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: hidden;
 }
 
 .reel .content div {
@@ -30,6 +31,13 @@
 
 .stop-shake {
   animation: stopShake 0.5s ease-in-out;
+}
+
+.symbol-image {
+  width: 60%;
+  margin: auto;
+  height: auto;
+  object-fit: contain;
 }
 
 @keyframes stopShake {

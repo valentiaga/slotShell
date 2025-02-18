@@ -13,7 +13,7 @@
         <!-- Componente en el cuadrado vacío -->
         <app-reel
           class="absolute top-[30%] left-[19%] w-[50%] h-[30%] flex items-center justify-center z-10  bg-white"
-          [duration]="getDuration(0)"
+          [duration]="duration"
           [index]="0"
           [targetSymbol]="targetSymbol"
           (stop)="onReelStop(0)"
@@ -26,7 +26,7 @@
         <img src="../../../assets/img/Surtidor_medio.webp" alt="Surtidor Medio" class="object-contain h-full w-full z-10" />
         <app-reel
           class="absolute top-[30%] left-[25%] w-[50%] h-[30%] flex items-center justify-center z-20"
-          [duration]="getDuration(1)"
+          [duration]="duration"
           [index]="1"
           [targetSymbol]="targetSymbol"
           (stop)="onReelStop(1)"
@@ -39,7 +39,7 @@
         <img src="../../../assets/img/Surtidor_derecha_A.webp" alt="Surtidor Derecha" class="object-contain h-full w-full z-20" />
         <app-reel
           class="absolute top-[30%] right-[19%] w-[50%] h-[30%] flex items-center justify-center z-10 bg-white"
-          [duration]="getDuration(2)"
+          [duration]="duration"
           [index]="2"
           [targetSymbol]="targetSymbol"
           (stop)="onReelStop(2)"
@@ -47,6 +47,10 @@
         ></app-reel>
       </div>
     </section>
+
+    <div *ngIf="showWinningMessage" class="winning-message">
+    {{ winningPrize }}
+    </div>
   </div>
 
   <button

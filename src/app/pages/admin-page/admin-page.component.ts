@@ -87,7 +87,11 @@ export class AdminPageComponent implements OnInit{
       field: 'display',
       flex: 1,
       minWidth: 150,
-      editable: true,
+      editable: (params) => {
+        const regex = /\bprizes\/\b/;
+        return !regex.test(params.data.display);
+
+      },
       filter: "agTextColumnFilter",
       floatingFilter: this.displayFilterRow,
     },

@@ -1,6 +1,7 @@
 <div [class.spin]="spinning" class="reel h-full w-full">
   <div class="content" [ngClass]="{'blink': blink}">
-    <div>{{ currentSymbol }}</div>
+    <img *ngIf="isImageUrl(currentSymbol)" [src]="currentSymbol" alt="Symbol Image" class="symbol-image" />
+    <div *ngIf="!isImageUrl(currentSymbol)"> {{ currentSymbol }}</div>
   </div>
 </div>
 <audio id="audio_stop" controls hidden>

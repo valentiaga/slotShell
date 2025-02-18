@@ -77,5 +77,10 @@ export class SymbolsService {
       map(() => this.hasEnoughPrizes())
     );
   }
+
+  getPrizeBySymbol(symbol: string): Premio | null {
+    return this.activePrizes.find(premio => premio.display === symbol) || null;
+  }
+  
     
 }

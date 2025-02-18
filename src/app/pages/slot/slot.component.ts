@@ -1,4 +1,4 @@
-import { NgClass, NgFor, NgStyle } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -12,16 +12,17 @@ import { ReelComponent } from '../../components/reel/reel.component';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { SocketService } from '../../services/socket/socket.service';
 import { CounterService } from '../../services/counter/counter.service';
+import { ConfettiService } from '../../services/confetti/confetti-service.service';
 
 @Component({
   selector: 'app-slot',
   standalone: true,
-  imports: [ReelComponent, RouterOutlet, NgClass],
+  imports: [ReelComponent, RouterOutlet, NgClass, CommonModule],
   templateUrl: './slot.component.html',
   styleUrls: ['./slot.component.css'],
   changeDetection: ChangeDetectionStrategy.Default,
 })
-export class SlotComponent implements OnInit{
+export class SlotComponent implements OnInit {
   @ViewChildren(ReelComponent) reels!: QueryList<ReelComponent>;
   estacionID!: number;
   randomSymbols: string[] = ['', '', ''];
@@ -32,8 +33,11 @@ export class SlotComponent implements OnInit{
   win?: HTMLAudioElement;
   socketService = inject(SocketService);
   isla: string = '';
+  duration = 2400;
+  winningPrize: string = '';
+  showWinningMessage: boolean = false;
 
-  constructor(private symbolsService: SymbolsService, private counterService: CounterService, private route: ActivatedRoute) {}
+  constructor(private symbolsService: SymbolsService, private counterService: CounterService, private route: ActivatedRoute, private confettiService: ConfettiService) { }
 
   async ngOnInit() {
     await this.setEstacion();
@@ -42,7 +46,7 @@ export class SlotComponent implements OnInit{
     this.createSocket();
   }
 
-  loadSymbols(){
+  loadSymbols() {
     this.back = document.getElementById('audio_back') as HTMLAudioElement;
     this.win = document.getElementById('audio_win') as HTMLAudioElement;
     this.initialRandomSymbols();
@@ -71,23 +75,24 @@ export class SlotComponent implements OnInit{
 
     // Escuchar el evento para accionar la ruleta
     this.socketService.onRuletaAccionada((data) => {
-      if (data.pinState === "LOW" && !this._isSpinning()){
+      if (data.pinState === "LOW" && !this._isSpinning()) {
         this.generateRandomSymbols()
       }
-      switch(data.pin){
+      switch (data.pin) {
         case 13:
           this.isla = 'Isla 1';
-        break;
+          break;
         case 26:
           this.isla = 'Isla 2';
-        break;
+          break;
         case 19:
           this.isla = 'Isla 3';
-        break;
-    }});
+          break;
+      }
+    });
   }
 
-  private _isSpinning() {    
+  private _isSpinning() {
     return this.spinning.some(reel => reel === true);
   }
 
@@ -102,7 +107,6 @@ export class SlotComponent implements OnInit{
       }
     });
   }
-  
 
   generateRandomSymbols() {
     this.symbolsService.updateSymbolsAndSpins(this.estacionID).subscribe((hasEnough) => {
@@ -110,7 +114,7 @@ export class SlotComponent implements OnInit{
         alert('Asegúrese de tener al menos 3 premios activos');
         return;
       }
-  
+
       let globalCounterValue = 0;
       this.counterService.incrementCounter(this.estacionID).subscribe({
         next: (response) => {
@@ -118,7 +122,7 @@ export class SlotComponent implements OnInit{
           this.spinning.fill(true);
           this.targetSymbol = this.symbolsService.checkTargetSymbol(globalCounterValue);
           let symbols: any = [];
-  
+
           if (this.targetSymbol === null) {
             do {
               symbols = [
@@ -131,7 +135,7 @@ export class SlotComponent implements OnInit{
             // Si targetSymbol no es null, lo usamos para los tres
             symbols = [this.targetSymbol, this.targetSymbol, this.targetSymbol];
           }
-  
+
           this.back?.play();
           this.win?.pause();
           this.reels.forEach((reel, index) => {
@@ -154,25 +158,29 @@ export class SlotComponent implements OnInit{
       });
       if (match) {
         this.win?.play();
+
+        const symbol = this.reels.first.currentSymbol;  
+        this.showPrizeMessage(symbol);
+
         this.reels.forEach((reel, index) => {
           reel.blink = true;
         });
+
+        this.confettiService.launchConfetti();
       }
     }
   }
 
-  getDuration(index: number) {
-    let duration = 0;
+  private showPrizeMessage(symbol: any) {
+    const prize = this.symbolsService.getPrizeBySymbol(symbol);
+    if (prize)
+      this.winningPrize = `🎉 ¡Has ganado $${prize.amount} en ${this.isla}! 🎉`;;
 
-    switch (index) {
-      case 0: 
-        duration = 600;
-        break;
-      case 1: duration = 1800;
-        break;
-      case 2:  duration = 2400;
-        break;
-    }
-    return duration;
+    this.showWinningMessage = true;
+    
+    setTimeout(() => {
+      this.showWinningMessage = false;
+      this.winningPrize = '';
+    }, 4000); 
   }
 }

@@ -1,11 +1,7 @@
-<div
-  class="fixed inset-0 z-50 overflow-auto flex items-center justify-center bg-black bg-opacity-50"
->
+<div class="fixed inset-0 z-50 overflow-auto flex items-center justify-center bg-black bg-opacity-50">
   <div class="relative p-4 w-full max-w-md max-h-full">
     <div class="relative bg-gris rounded-lg shadow dark:bg-white">
-      <div
-        class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600"
-      >
+      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-700">
           Nuevo premio
         </h3>
@@ -15,153 +11,87 @@
           <div class="flex flex-col">
             <div class="flex gap-4 my-2">
               <div>
-                <label
-                  for="nombre"
-                  class="block mb-2 w-full text-sm font-medium text-gray-900"
-                  >Nombre</label
-                >
-                <input
-                  type="string"
-                  name="nombre"
-                  [(ngModel)]="formData['title']"
-                  id="nombre"
-                  class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
-                />
+                <label for="nombre" class="block mb-2 w-full text-sm font-medium text-gray-900">Nombre</label>
+                <input type="string" name="nombre" [(ngModel)]="formData['title']" id="nombre"
+                  class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5" />
               </div>
               <div>
-                <label
-                  for="monto"
-                  class="block mb-2 w-full text-sm font-medium text-gray-900"
-                  >Monto</label
-                >
+                <label for="monto" class="block mb-2 w-full text-sm font-medium text-gray-900">Monto</label>
                 <div class="relative">
-                  <div
-                    class="absolute inset-y-0 start-0 flex items-center ps-1 pointer-events-none"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      height="24px"
-                      viewBox="0 -960 960 960"
-                      width="24px"
-                      fill="#B7B7B7"
-                    >
+                  <div class="absolute inset-y-0 start-0 flex items-center ps-1 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                      fill="#B7B7B7">
                       <path
-                        d="M441-120v-86q-53-12-91.5-46T293-348l74-30q15 48 44.5 73t77.5 25q41 0 69.5-18.5T587-356q0-35-22-55.5T463-458q-86-27-118-64.5T313-614q0-65 42-101t86-41v-84h80v84q50 8 82.5 36.5T651-650l-74 32q-12-32-34-48t-60-16q-44 0-67 19.5T393-614q0 33 30 52t104 40q69 20 104.5 63.5T667-358q0 71-42 108t-104 46v84h-80Z"
-                      />
+                        d="M441-120v-86q-53-12-91.5-46T293-348l74-30q15 48 44.5 73t77.5 25q41 0 69.5-18.5T587-356q0-35-22-55.5T463-458q-86-27-118-64.5T313-614q0-65 42-101t86-41v-84h80v84q50 8 82.5 36.5T651-650l-74 32q-12-32-34-48t-60-16q-44 0-67 19.5T393-614q0 33 30 52t104 40q69 20 104.5 63.5T667-358q0 71-42 108t-104 46v84h-80Z" />
                     </svg>
                   </div>
-                  <input
-                    type="text"
-                    name="monto"
-                    [(ngModel)]="formData['amount']"
-                    id="monto"
-                    class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5 ps-8"
-                  />
+                  <input type="text" name="monto" [(ngModel)]="formData['amount']" id="monto"
+                    class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5 ps-8" />
                 </div>
               </div>
             </div>
-            <label
-              for="display"
-              class="block mb-2 w-full text-sm font-medium text-gray-900 my-2"
-              >Display</label
-            >
-            <div class="relative">
-              <input
-                type="text"
-                name="display"
-                [(ngModel)]="formData['display']"
-                id="display"
+
+            <label for="display" class="block mb-2 w-full text-sm font-medium text-gray-900 my-2">Display</label>
+            <div class="relative flex items-center">
+              <input type="text" name="display" [(ngModel)]="formData['display']" id="display"
                 class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
-              />
+                [attr.maxlength]="showImageSelector ? null : 4"/>
+              <button type="button" (click)="toggleSelector()"
+                class="ml-2 bg-gray-300 text-gray-700 px-4 py-2 rounded">
+                Seleccionar
+              </button>
             </div>
-            <label
-              for="dias"
-              class="block mb-2 text-sm font-medium text-gray-900 my-2"
-              >Días</label
-            >
-            <app-dias-cell-renderer
-              [diasModal]= "formData['active_days']"
-              [isModal]="true"
-              (selectedDays)="onSelectedDays($event)"
-              class="my-2"
-            ></app-dias-cell-renderer>
+
+            <!-- Selector de imágenes -->
+            <div *ngIf="showImageSelector && images" class="mt-2 p-4 bg-white shadow rounded">
+              <h4 class="text-sm font-medium mb-2">Selecciona una imagen</h4>
+
+              <!-- Contenedor con scrollbar horizontal -->
+              <div class="flex gap-2 overflow-x-auto whitespace-nowrap p-2">
+                <img *ngFor="let image of images" [src]="image.url_img" [alt]="image.name_img"
+                  class="w-16 h-16 object-cover cursor-pointer border rounded"
+                  [ngClass]="{'border-gray-500': formData['display'] === image.url_img}"
+                  (click)="toggleImageSelection(image)">
+              </div>
+            </div>
+
+            <label for="dias" class="block mb-2 text-sm font-medium text-gray-900 my-2">Días</label>
+            <app-dias-cell-renderer [diasModal]="formData['active_days']" [isModal]="true"
+              (selectedDays)="onSelectedDays($event)" class="my-2"></app-dias-cell-renderer>
             <div class="flex gap-4 my-2">
               <div>
-                <label
-                  for="desde"
-                  class="block mb-2 text-sm font-medium text-gray-900"
-                  >Desde</label
-                >
-                <input
-                  type="time"
-                  name="desde"
-                  [(ngModel)]="formData['start_time']"
-                  id="desde"
-                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
-                />
+                <label for="desde" class="block mb-2 text-sm font-medium text-gray-900">Desde</label>
+                <input type="time" name="desde" [(ngModel)]="formData['start_time']" id="desde"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5" />
               </div>
               <div>
-                <label
-                  for="hasta"
-                  class="block mb-2 text-sm font-medium text-gray-900"
-                  >Hasta</label
-                >
-                <input
-                  type="time"
-                  name="hasta"
-                  [(ngModel)]="formData['end_time']"
-                  id="hasta"
-                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
-                />
+                <label for="hasta" class="block mb-2 text-sm font-medium text-gray-900">Hasta</label>
+                <input type="time" name="hasta" [(ngModel)]="formData['end_time']" id="hasta"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5" />
               </div>
               <div>
-                <label
-                  for="spins"
-                  class="block mb-2 w-full text-sm font-medium text-gray-900"
-                  >Contador</label
-                >
-                <input
-                  type="number"
-                  name="spins"
-                  [(ngModel)]="formData['spins']"
-                  id="spins"
-                  min="1"
+                <label for="spins" class="block mb-2 w-full text-sm font-medium text-gray-900">Contador</label>
+                <input type="number" name="spins" [(ngModel)]="formData['spins']" id="spins" min="1"
                   class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
-                  (input)="validateSpins(formData['spins'])"
-                />
+                  (input)="validateSpins(formData['spins'])" />
                 <p *ngIf="isSpinDuplicate" class="text-red-600 text-sm mt-1">
                   Este contador ya está en uso en el premio {{ id_prize }}.
                 </p>
               </div>
             </div>
             <div class="flex items-center my-4">
-              <input
-                id="is_active"
-                [(ngModel)]="formData['is_active']"
-                name="is_active" 
-                type="checkbox"
-                checked
-              />
-              <label
-                for="is_active"
-                class="ms-2 text-sm font-medium text-gray-900"
-                >Activo</label
-              >
+              <input id="is_active" [(ngModel)]="formData['is_active']" name="is_active" type="checkbox" checked />
+              <label for="is_active" class="ms-2 text-sm font-medium text-gray-900">Activo</label>
             </div>
           </div>
           <div class="flex justify-end mb-4">
             <button
               class="text-gray-700 bg-gray-300 hover:bg-gray-400 focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm px-5 py-2.5 mx-2"
-              (click)="onClose()"
-            >
+              (click)="onClose()">
               Cancelar
             </button>
-            <button
-              type="submit"
-              [disabled]="!isFormValid"
-              [ngClass]="{ 'btn-disabled': !isFormValid }"
-              class="add-button text-white text-base font-bold py-1 px-4 focus:ring-2 focus:ring-white focus:outline-none rounded"
-            >
+            <button type="submit" [disabled]="!isFormValid" [ngClass]="{ 'btn-disabled': !isFormValid }"
+              class="add-button text-white text-base font-bold py-1 px-4 focus:ring-2 focus:ring-white focus:outline-none rounded">
               Agregar
             </button>
           </div>
