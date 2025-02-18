@@ -1,3 +1,41 @@
 .small-symbol {
-    font-size: 20px; /* Ajusta el tamaño del símbolo */
+  font-size: 20px;
+  /* Ajusta el tamaño del símbolo */
+}
+
+.winning-message {
+  position: fixed;
+  bottom: 70%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 2rem;
+  padding: 20px 40px;
+  border-radius: 10px;
+  text-align: center;
+  animation: fadeInOut 10s ease-in-out;
+  z-index: 10000;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -60%);
   }
+
+  10% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+
+  90% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+}

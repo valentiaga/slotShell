@@ -1,4 +1,4 @@
-import { NgClass, NgFor, NgStyle } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -17,7 +17,7 @@ import { ConfettiService } from '../../services/confetti/confetti-service.servic
 @Component({
   selector: 'app-slot',
   standalone: true,
-  imports: [ReelComponent, RouterOutlet, NgClass],
+  imports: [ReelComponent, RouterOutlet, NgClass, CommonModule],
   templateUrl: './slot.component.html',
   styleUrls: ['./slot.component.css'],
   changeDetection: ChangeDetectionStrategy.Default,
@@ -33,6 +33,9 @@ export class SlotComponent implements OnInit {
   win?: HTMLAudioElement;
   socketService = inject(SocketService);
   isla: string = '';
+  duration = 2400;
+  winningPrize: string = '';
+  showWinningMessage: boolean = false;
 
   constructor(private symbolsService: SymbolsService, private counterService: CounterService, private route: ActivatedRoute, private confettiService: ConfettiService) { }
 
@@ -105,7 +108,6 @@ export class SlotComponent implements OnInit {
     });
   }
 
-
   generateRandomSymbols() {
     this.symbolsService.updateSymbolsAndSpins(this.estacionID).subscribe((hasEnough) => {
       if (!hasEnough) {
@@ -156,6 +158,10 @@ export class SlotComponent implements OnInit {
       });
       if (match) {
         this.win?.play();
+
+        const symbol = this.reels.first.currentSymbol;  
+        this.showPrizeMessage(symbol);
+
         this.reels.forEach((reel, index) => {
           reel.blink = true;
         });
@@ -165,18 +171,16 @@ export class SlotComponent implements OnInit {
     }
   }
 
-  getDuration(index: number) {
-    let duration = 0;
+  private showPrizeMessage(symbol: any) {
+    const prize = this.symbolsService.getPrizeBySymbol(symbol);
+    if (prize)
+      this.winningPrize = `🎉 ¡Has ganado $${prize.amount} en ${this.isla}! 🎉`;;
 
-    switch (index) {
-      case 0:
-        duration = 600;
-        break;
-      case 1: duration = 1800;
-        break;
-      case 2: duration = 2400;
-        break;
-    }
-    return duration;
+    this.showWinningMessage = true;
+    
+    setTimeout(() => {
+      this.showWinningMessage = false;
+      this.winningPrize = '';
+    }, 4000); 
   }
 }

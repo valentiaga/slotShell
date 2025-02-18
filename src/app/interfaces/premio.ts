@@ -2,7 +2,7 @@ export interface Premio {
     id_prize?: number;
     title: string;
     is_active: boolean;
-    amoun: number;
+    amount: number;
     display: string;
     start_time: string;
     end_time: string;
