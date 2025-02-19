@@ -14,3 +14,16 @@ input {
     border-color: gray;
     outline: none;
   }
+
+  .anton-regular {
+    font-family: "Anton", serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  .monomaniac-one-regular {
+    font-family: "Monomaniac One", serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  

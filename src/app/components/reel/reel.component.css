@@ -2,31 +2,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
   overflow: hidden;
+  border-radius: 10px;
 }
 
-.reel .content div {
-  font-size: calc(2vw + 2vh);
-  margin-bottom: auto;
-  margin-top: auto;
-  /* font-size: 3vw;   */
-  transition: transform 0.2s ease-in-out;
-  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-}
-
-.reel .content div:active {
-  transform: scale(1.2);  /* Efecto de "enfoque" cuando el símbolo está activo */
-}
-
-.reel .content {
-  /* width: 80%; */
+.content {
+  width: 100%;
+  height: 100%;
   display: flex;
-  flex-direction: column;
-}
-
-.reel.spin .content {
-  animation: spin 0.15s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  /* font-family: 'Anton'; */
+  font-family: 'Monomaniac One';
+  color: rgb(70, 70, 70);
 }
 
 .stop-shake {
@@ -40,28 +29,56 @@
   object-fit: contain;
 }
 
+.spin.up {
+  animation: spinEffect 0.2s infinite linear;
+}
+
+.spin.down {
+  animation: spinEffectDown 0.3s infinite linear;
+}
+
+@keyframes spinEffect {
+  0% {
+    transform: rotateX(20deg) translateY(80%);
+  }
+  25% {
+    transform: rotateX(15deg) translateY(40%);
+  }
+  50% {
+    transform: translateY(-10%);
+  }
+  75% {
+    transform: rotateX(-15deg) translateY(-50%);
+  }
+  100% {
+    transform: rotateX(-20deg) translateY(-100%);
+  }
+}
+
+@keyframes spinEffectDown {
+  0% {
+    transform: rotateX(-20deg) translateY(-80%);
+  }
+  25% {
+    transform: rotateX(-15deg) translateY(-40%);
+  }
+  50% {
+    transform: translateY(10%);
+  }
+  75% {
+    transform: rotateX(15deg) translateY(50%);
+  }
+  100% {
+    transform: rotateX(20deg) translateY(100%);
+  }
+}
+
 @keyframes stopShake {
   0% { transform: translateY(0); }
   25% { transform: translateY(5px); }
   50% { transform: translateY(-5px); }
   75% { transform: translateY(2px); }
   100% { transform: translateY(0); }
-}
-
-
-@keyframes spin {
-  0% {
-    transform: translateY(80%);
-  }
-  40% {
-    transform: translateY(-50%);
-  }
-  70% {
-    transform: translateY(10%);
-  }
-  100% {
-    transform: translateY(-100%);
-  }
 }
 
 @keyframes blink {
@@ -77,5 +94,5 @@
 }
 
 .blink {
-  animation: blink 0.5s infinite, grow 0.5s;
+  animation: blink 1s infinite, grow 0.5s;
 }

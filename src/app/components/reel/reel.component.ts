@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { SymbolsService } from '../../services/symbols.service';
+import { PremiosService } from '../../services/premios/premios.service';
 
 @Component({
     selector: 'app-reel',
@@ -12,52 +13,71 @@ import { SymbolsService } from '../../services/symbols.service';
     styleUrl: './reel.component.css',
     changeDetection: ChangeDetectionStrategy.Default,
 })
-export class ReelComponent {
-  @Input() duration: number = 1000;
+export class ReelComponent implements OnInit {
+  @Input() duration: number = 4000;
   @Input() targetSymbol?: string | null;
-  @Output() stop = new EventEmitter<void>();
+  @Output() stop = new EventEmitter<number>();
   @Input() index: number = -1;
+  direction = 'down';
 
   currentSymbol: string = this.symbolsService.getRandomSymbol();
   spinning: boolean = false;
   intervalId?: any;
   blink:boolean = false;
 
-  constructor(private symbolsService: SymbolsService) {}
+  reelSymbols: string[] = [];
+  animationFrameId: number | null = null;
 
-  startSpinning(symbol: string) {
+  constructor(private symbolsService: SymbolsService, private premiosService: PremiosService) {}
+
+  ngOnInit () {
+    this.premiosService.getActivePrizes().subscribe((response) => {
+      this.reelSymbols = response.body.map(prize => prize.display);
+    })
+  }
+
+  getClassObject() {
+    return {
+      [this.direction]: true,
+      'blink': this.blink
+    };
+  }
+
+  startSpinning(target: string, direction: 'up' | 'down', duration: number) {
     this.spinning = true;
-    this.blink = false;
-    let intervalTime = 100;  // Tiempo inicial del intervalo (rápido al principio)
-    let speedUp = true;  // Indicador para acelerar o desacelerar la animación
+    let startTime: number | null = null;
+    this.direction = direction;
   
-    this.intervalId = setInterval(() => {
-      this.currentSymbol = this.symbolsService.getRandomSymbol();
+    const easeOut = (time: number, duration: number) => {
+      // Función easeOut: reduce la velocidad conforme se acerca al final
+      const t = time / duration;
+      return t < 1 ? 1 - Math.pow(1 - t, 3) : 1;
+    };
   
-      // Acelera al principio
-      if (speedUp && intervalTime > 50) {
-        intervalTime -= 10;  // Acelera el intervalo
+    const spin = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+  
+      // Calculamos el tiempo de la animación usando easing
+      const easedTime = easeOut(elapsed, duration);
+  
+      // Solo actualizamos el símbolo si ha pasado el tiempo necesario basado en easedTime
+      if (elapsed < duration) {
+        if (Math.random() < easedTime) {
+          // Cambio rápido de símbolos mientras gira
+          this.currentSymbol = this.reelSymbols[Math.floor(Math.random() * this.reelSymbols.length)];
+        }
+
+        this.animationFrameId = requestAnimationFrame(spin);
+      } else {
+        // Al final, detenemos el giro y mostramos el símbolo objetivo
+        this.currentSymbol = target;
+        this.direction = '';
+        this.stopSpinning();
       }
+    };
   
-      // Desacelera hacia el final
-      if (!speedUp && intervalTime < 150) {
-        intervalTime += 30;  // Desacelera el intervalo
-      }
-  
-      if (intervalTime <= 50) {
-        speedUp = false;
-      }
-  
-      clearInterval(this.intervalId);
-      this.intervalId = setInterval(() => {
-        this.currentSymbol = this.symbolsService.getRandomSymbol();
-      }, intervalTime);
-    }, intervalTime);
-  
-    setTimeout(() => {
-      this.currentSymbol = symbol;
-      this.stopSpinning();
-    }, this.duration);
+    this.animationFrameId = requestAnimationFrame(spin);
   }
 
   isImageUrl(url: string): boolean {
@@ -82,7 +102,7 @@ export class ReelComponent {
       setTimeout(() => reelElement.classList.remove('stop-shake'), 500);
     }
   
-    this.stop.emit();
+    this.stop.emit(this.index);
   }
   
   

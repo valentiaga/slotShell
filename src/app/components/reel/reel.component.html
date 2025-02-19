@@ -1,5 +1,5 @@
-<div [class.spin]="spinning" class="reel h-full w-full">
-  <div class="content" [ngClass]="{'blink': blink}">
+<div class="reel h-full w-full">
+  <div class="content" [class.spin]="spinning" [ngClass]="getClassObject()">
     <img *ngIf="isImageUrl(currentSymbol)" [src]="currentSymbol" alt="Symbol Image" class="symbol-image" />
     <div *ngIf="!isImageUrl(currentSymbol)"> {{ currentSymbol }}</div>
   </div>

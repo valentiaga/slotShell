@@ -132,14 +132,18 @@ export class SlotComponent implements OnInit {
               ];
             } while (symbols[0] === symbols[1] && symbols[1] === symbols[2]);
           } else {
-            // Si targetSymbol no es null, lo usamos para los tres
             symbols = [this.targetSymbol, this.targetSymbol, this.targetSymbol];
           }
 
           this.back?.play();
           this.win?.pause();
           this.reels.forEach((reel, index) => {
-            reel.startSpinning(symbols[index]);  // Le pasamos el símbolo correspondiente a cada reel
+            reel.blink = false;
+            const direction = index === 1 ? 'down' : 'up';
+            const delay = index === 1 ? 500 : index === 0 ? 0 : 250;
+            setTimeout(() => {
+              reel.startSpinning(symbols[index], direction, index === 1 ? 4000 : 3200);
+            }, delay);
           });
         },
         error: (err) => {
