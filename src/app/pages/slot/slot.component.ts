@@ -36,6 +36,7 @@ export class SlotComponent implements OnInit {
   duration = 2400;
   winningPrize: string = '';
   showWinningMessage: boolean = false;
+  isTestMode: boolean = false;
 
   constructor(private symbolsService: SymbolsService, private counterService: CounterService, private route: ActivatedRoute, private confettiService: ConfettiService) { }
 
@@ -44,6 +45,16 @@ export class SlotComponent implements OnInit {
     this.counterService.getCounter();
     this.loadSymbols();
     this.createSocket();
+
+    this.checkTestMode()
+  }
+
+  checkTestMode() {
+    const url = this.route.snapshot.url.map(segment => segment.path).join('/');
+    this.isTestMode = url.includes('test');
+
+    if (this.isTestMode)
+      this.isla = 'Isla Test'
   }
 
   loadSymbols() {
