@@ -86,19 +86,21 @@ export class SlotComponent implements OnInit {
 
     // Escuchar el evento para accionar la ruleta
     this.socketService.onRuletaAccionada((data) => {
+      console.log("🚀 ~ SlotComponent ~ this.socketService.onRuletaAccionada ~ data:", data)
       if (data.pinState === "LOW" && !this._isSpinning()) {
         this.generateRandomSymbols()
-      }
-      switch (data.pin) {
-        case 13:
-          this.isla = 'Isla 1';
-          break;
-        case 26:
-          this.isla = 'Isla 2';
-          break;
-        case 19:
-          this.isla = 'Isla 3';
-          break;
+        
+        switch (data.pin) {
+          case 13:
+            this.isla = 'Isla 1';
+            break;
+          case 26:
+            this.isla = 'Isla 2';
+            break;
+          case 19:
+            this.isla = 'Isla 3';
+            break;
+        }
       }
     });
   }
