@@ -37,6 +37,7 @@ export class SlotComponent implements OnInit {
   winningPrize: string = '';
   showWinningMessage: boolean = false;
   isTestMode: boolean = false;
+  isSpinDelayed: boolean = false;
 
   constructor(private symbolsService: SymbolsService, private counterService: CounterService, private route: ActivatedRoute, private confettiService: ConfettiService) { }
 
@@ -87,10 +88,10 @@ export class SlotComponent implements OnInit {
     // Escuchar el evento para accionar la ruleta
     this.socketService.onRuletaAccionada((data) => {
       console.log("🚀 ~ SlotComponent ~ this.socketService.onRuletaAccionada ~ data:", data)
-      if (data.pinState === "LOW" && !this._isSpinning()) {
+      if (data.pinState === "LOW" && !this._isSpinning() && !this.isSpinDelayed) {
         this.generateRandomSymbols()
-        
-        switch (data.pin) {
+
+        switch (data.pinData) {
           case 13:
             this.isla = 'Isla 1';
             break;
@@ -184,6 +185,11 @@ export class SlotComponent implements OnInit {
         });
 
         this.confettiService.launchConfetti();
+        this.isSpinDelayed = true;
+        setTimeout( () => {
+          this.isSpinDelayed = false;
+        }
+        , 10000)
       }
     }
   }
