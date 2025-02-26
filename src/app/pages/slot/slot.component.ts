@@ -201,7 +201,7 @@ export class SlotComponent implements OnInit {
       const data = {
         valor: prize.amount,
         isla: this.isla,
-        estacionID: this.estacionID
+        estacion: this.estacionID
       };
   
       this.socketService.emit('premioGanado', data);
