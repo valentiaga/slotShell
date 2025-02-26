@@ -178,7 +178,7 @@ export class SlotComponent implements OnInit {
         this.win?.play();
 
         const symbol = this.reels.first.currentSymbol;  
-        this.showPrizeMessage(symbol);
+        this._notifyWinning(symbol);
 
         this.reels.forEach((reel, index) => {
           reel.blink = true;
@@ -194,10 +194,18 @@ export class SlotComponent implements OnInit {
     }
   }
 
-  private showPrizeMessage(symbol: any) {
+  private _notifyWinning(symbol: any) {
     const prize = this.symbolsService.getPrizeBySymbol(symbol);
-    if (prize)
+    if (prize){
       this.winningPrize = `🎉 ¡Has ganado $${prize.amount} en ${this.isla}! 🎉`;;
+      const data = {
+        valor: prize.amount,
+        isla: this.isla,
+        estacionID: this.estacionID
+      };
+  
+      this.socketService.emit('premioGanado', data);
+    };
 
     this.showWinningMessage = true;
     

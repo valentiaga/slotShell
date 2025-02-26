@@ -33,6 +33,12 @@ export class SocketService {
     });
   }
 
+  // Método para emitir eventos al servidor
+  emit(event: string, data: any): void {
+    this.socket.emit(event, data);
+  }
+
+
   // private socket: Socket | undefined;
   // private socketIP: Socket;
   // private raspberryIp: string = '';
