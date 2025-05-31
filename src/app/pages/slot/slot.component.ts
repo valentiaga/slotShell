@@ -196,16 +196,36 @@ export class SlotComponent implements OnInit {
 
   private _notifyWinning(symbol: any) {
     const prize = this.symbolsService.getPrizeBySymbol(symbol);
-    if (prize){
-      this.winningPrize = `🎉 ¡Has ganado $${prize.amount} en ${this.isla}! 🎉`;;
+    if (prize) {
+      // Verificar si es un premio monetario o no monetario
+      let prizeDisplay = '';
+      let prizeValue = 0;
+      
+      if (prize.amount && prize.amount > 0) {
+        // Premio monetario
+        prizeDisplay = `$${prize.amount}`;
+        prizeValue = prize.amount;
+      } else if (prize.description) {
+        // Premio no monetario
+        prizeDisplay = prize.description;
+        prizeValue = 0; // O un valor simbólico si es necesario para el backend
+      } else {
+        // Fallback
+        prizeDisplay = prize.title;
+        prizeValue = 0;
+      }
+
+      this.winningPrize = `🎉 ¡Has ganado ${prizeDisplay.toLowerCase()} en ${this.isla}! 🎉`;
+      
       const data = {
-        valor: prize.amount,
+        valor: prizeValue,
+        descripcion: prize.description || null,
         isla: this.isla,
         estacion: this.estacionID
       };
-  
+
       this.socketService.emit('premioGanado', data);
-    };
+    }
 
     this.showWinningMessage = true;
     
