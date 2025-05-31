@@ -28,11 +28,12 @@ export class ModalComponent implements OnInit {
   images: Image[] = [];
   showImageSelector = false;
   selectedImageName: string = '';
-
+  tipoPremio: 'monetario' | 'no_monetario' = 'monetario';
 
   formData: { [key: string]: any } = {
     title: '',
     amount: '',
+    description: '', // Nuevo campo para premios no monetarios
     display: '',
     frequency: 1,
     is_active: true,
@@ -47,7 +48,27 @@ export class ModalComponent implements OnInit {
   }
 
   onSubmit(form: any) {
-    this.formSubmit.emit(this.formData);
+    // Preparar los datos según el tipo de premio
+    const submitData = { ...this.formData };
+    
+    if (this.tipoPremio === 'no_monetario') {
+      // Para premios no monetarios, establecer amount como null o 0
+      submitData['amount'] = null;
+    } else {
+      // Para premios monetarios, limpiar description
+      submitData['description'] = null;
+    }
+    
+    this.formSubmit.emit(submitData);
+  }
+
+  onTipoChange() {
+    // Limpiar campos cuando cambie el tipo
+    if (this.tipoPremio === 'monetario') {
+      this.formData['description'] = '';
+    } else {
+      this.formData['amount'] = '';
+    }
   }
 
   toggleImageSelection(image: any) {
@@ -85,11 +106,16 @@ export class ModalComponent implements OnInit {
   }
 
   get isFormValid(): boolean {
-    return this.formData['title']
-      && this.formData['amount']
+    const baseValidation = this.formData['title']
       && this.formData['display']
       && this.formData['spins']
       && !this.isSpinDuplicate;
+
+    if (this.tipoPremio === 'monetario') {
+      return baseValidation && this.formData['amount'];
+    } else {
+      return baseValidation && this.formData['description'];
+    }
   }
 
   onCheckboxChange(event: Event, key: string) {

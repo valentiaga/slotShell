@@ -10,25 +10,54 @@
         <form class="space-y-4" (ngSubmit)="onSubmit(form)" #form="ngForm">
           <div class="flex flex-col">
             <div class="flex gap-4 my-2">
-              <div>
+              <div class="flex-1">
                 <label for="nombre" class="block mb-2 w-full text-sm font-medium text-gray-900">Nombre</label>
                 <input type="string" name="nombre" [(ngModel)]="formData['title']" id="nombre"
                   class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5" />
               </div>
-              <div>
-                <label for="monto" class="block mb-2 w-full text-sm font-medium text-gray-900">Monto</label>
-                <div class="relative">
-                  <div class="absolute inset-y-0 start-0 flex items-center ps-1 pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
-                      fill="#B7B7B7">
-                      <path
-                        d="M441-120v-86q-53-12-91.5-46T293-348l74-30q15 48 44.5 73t77.5 25q41 0 69.5-18.5T587-356q0-35-22-55.5T463-458q-86-27-118-64.5T313-614q0-65 42-101t86-41v-84h80v84q50 8 82.5 36.5T651-650l-74 32q-12-32-34-48t-60-16q-44 0-67 19.5T393-614q0 33 30 52t104 40q69 20 104.5 63.5T667-358q0 71-42 108t-104 46v84h-80Z" />
-                    </svg>
-                  </div>
-                  <input type="text" name="monto" [(ngModel)]="formData['amount']" id="monto"
-                    class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5 ps-8" />
+            </div>
+
+            <!-- Tipo de premio -->
+            <div class="my-4">
+              <label class="block mb-2 text-sm font-medium text-gray-900">Tipo de premio</label>
+              <div class="flex gap-4">
+                <div class="flex items-center">
+                  <input id="monetario" name="tipo_premio" type="radio" value="monetario" 
+                    [(ngModel)]="tipoPremio" (change)="onTipoChange()"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
+                  <label for="monetario" class="ms-2 text-sm font-medium text-gray-900">Monetario</label>
+                </div>
+                <div class="flex items-center">
+                  <input id="no_monetario" name="tipo_premio" type="radio" value="no_monetario" 
+                    [(ngModel)]="tipoPremio" (change)="onTipoChange()"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
+                  <label for="no_monetario" class="ms-2 text-sm font-medium text-gray-900">No monetario</label>
                 </div>
               </div>
+            </div>
+
+            <!-- Campo de monto (solo si es monetario) -->
+            <div *ngIf="tipoPremio === 'monetario'" class="my-2">
+              <label for="monto" class="block mb-2 w-full text-sm font-medium text-gray-900">Monto</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 start-0 flex items-center ps-1 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#B7B7B7">
+                    <path
+                      d="M441-120v-86q-53-12-91.5-46T293-348l74-30q15 48 44.5 73t77.5 25q41 0 69.5-18.5T587-356q0-35-22-55.5T463-458q-86-27-118-64.5T313-614q0-65 42-101t86-41v-84h80v84q50 8 82.5 36.5T651-650l-74 32q-12-32-34-48t-60-16q-44 0-67 19.5T393-614q0 33 30 52t104 40q69 20 104.5 63.5T667-358q0 71-42 108t-104 46v84h-80Z" />
+                  </svg>
+                </div>
+                <input type="number" name="monto" [(ngModel)]="formData['amount']" id="monto"
+                  class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5 ps-8" />
+              </div>
+            </div>
+
+            <!-- Campo de descripción (solo si es no monetario) -->
+            <div *ngIf="tipoPremio === 'no_monetario'" class="my-2">
+              <label for="descripcion" class="block mb-2 w-full text-sm font-medium text-gray-900">Descripción del premio</label>
+              <input type="text" name="descripcion" [(ngModel)]="formData['description']" id="descripcion"
+                placeholder="Ej: Lavado gratis, Descuento 50%, etc."
+                class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5" />
             </div>
 
             <label for="display" class="block mb-2 w-full text-sm font-medium text-gray-900 my-2">Display</label>

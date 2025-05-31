@@ -73,15 +73,29 @@ export class AdminPageComponent implements OnInit{
       floatingFilter: this.displayFilterRow,
     },
     {
-      headerName: 'Monto',
+      headerName: 'Monto/Premio',
       field: 'amount',
       flex: 1,
       minWidth: 150,
       editable: true,
-      filter: "agNumberColumnFilter",
+      filter: "agTextColumnFilter", // Cambiar a texto para permitir búsqueda de descripciones
       floatingFilter: this.displayFilterRow,
-      cellRenderer: (params: any) => `$ ${params.value}`    
-    },
+      cellRenderer: (params: any) => {
+        // Si tiene amount, mostrar como monto monetario
+        if (params.value && typeof params.value === 'number') {
+          return `$ ${params.value}`;
+        }
+        // Si no tiene amount pero tiene description, mostrar la descripción
+        if (params.data.description) {
+          return params.data.description;
+        }
+        // Fallback para casos donde amount es string pero no es null/undefined
+        if (params.value && typeof params.value === 'string') {
+          return params.value;
+        }
+        return 'N/A';
+      }
+    },  
     {
       headerName: 'Display',
       field: 'display',
