@@ -1,9 +1,5 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
-import { BehaviorSubject, fromEvent, Observable, tap } from 'rxjs';
-import { environments } from '../../../assets/environment';
-import { HttpClient } from '@angular/common/http';
-import { UtilService } from '../util/util.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,8 +16,6 @@ export class SocketService {
 
   // Método para unirse a un room
   joinRoom(room: string): void {
-    console.log("🚀 ~ SocketService ~ joinRoom ~ room:", room)
-    
     this.socket.emit('joinRoom', room);
   }
 
@@ -47,7 +41,7 @@ export class SocketService {
 
   // constructor(private http: HttpClient, private util: UtilService) {
   //   // Conexión al backend
-  //   this.socketIP = io(`172.20.10.9:3000`); 
+  //   this.socketIP = io(`172.20.10.9:3000`);
   //   this.connectToRaspberryPi();
   //   console.log("🚀 ~ SocketService ~ constructor ~ this.socketIP:", this.socketIP);
 
@@ -68,12 +62,12 @@ export class SocketService {
   // }
 
   // async connectToRaspberryPi() {
-    
+
   //   this.getCurrentIP().subscribe((response => {
   //     console.log(response.body);
   //     this.raspberryIp = response.body;
   //     this.socket = io(`http://${this.raspberryIp}:5000`);
-      
+
   //       this.socket.on('connect', () => {
   //         console.log('Conectado al servidor de Raspberry Pi');
   //         this.toggleLed();
@@ -83,7 +77,7 @@ export class SocketService {
   //         console.log('Evento pin_change recibido:', data);
   //         this.pinChangeSubject.next(data); // Emitir el evento
   //       });
-    
+
   //       this.socket.on('disconnect', () => {
   //         console.log('Desconectado del servidor de Raspberry Pi');
   //       });
@@ -110,7 +104,7 @@ export class SocketService {
   // onPinChange(): Observable<any> {
   //   return this.pinChangeSubject.asObservable(); // Devuelve el Subject como un Observable
   // }
-  
+
 
   // onIpUpdated(): Observable<{ ip_address: string }> {
   //   return fromEvent<{ ip_address: string }>(this.socketIP, 'ip_updated');
