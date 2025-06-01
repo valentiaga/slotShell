@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
 import { NgxUiLoaderModule } from 'ngx-ui-loader';
+import { ToastService } from '../../services/toast/toast.service';
 
 @Component({
   selector: 'auth-login-page',
@@ -28,6 +29,7 @@ export class LoginPageComponent {
   public authService = inject (AuthService);
   private router = inject(Router)
   public hidePassword: boolean = true;
+  private toastService = inject(ToastService);
 
   public loginForm: FormGroup = this.fb.group({
     username: ['', [Validators.required]],
@@ -54,6 +56,7 @@ export class LoginPageComponent {
           this.router.navigateByUrl('/panel')},
         error: () => {
           console.log('error al loguear');
+          this.toastService.showToast('error', 'Usuario o contraseña incorrectos');
         }
       })
   }
