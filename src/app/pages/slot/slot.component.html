@@ -4,9 +4,9 @@
     <div class="absolute inset-0 z-0">
       <img src="../../../assets/img/Fondo.webp" alt="Background Image" class="w-screen h-screen object-cover" />
     </div>
-  
+
     <!-- Contenedor de los surtidores con sus componentes -->
-    <section class="absolute inset-0 flex items-center justify-center w-3/4 mx-auto">
+    <section *ngIf="activePrizes.length > 0" class="absolute inset-0 flex items-center justify-center w-3/4 mx-auto">
       <!-- Surtidor Izquierda -->
       <div class="relative h-full w-full flex items-center justify-center">
         <img src="../../../assets/img/Surtidor_izquierda_A.webp" alt="Surtidor Izquierda" class="object-contain h-full w-full z-20" />
@@ -14,36 +14,39 @@
         <app-reel
           class="absolute top-[30%] left-[19%] w-[50%] h-[30%] flex items-center justify-center z-10  bg-white"
           [duration]="duration"
+          [displayPrizes]="displayPrizes"
           [index]="0"
           [targetSymbol]="targetSymbol"
           (stop)="onReelStop(0)"
-          [ngClass]="'small-symbol'" 
+          [ngClass]="'small-symbol'"
         ></app-reel>
       </div>
-  
+
       <!-- Surtidor Medio -->
       <div class="relative h-full w-full flex items-center justify-center">
         <img src="../../../assets/img/Surtidor_medio_A.webp" alt="Surtidor Medio" class="object-contain h-full w-full z-20" />
         <app-reel
           class="absolute top-[30%] left-[25%] w-[50%] h-[30%] flex items-center justify-center z-10 bg-white"
           [duration]="duration"
+          [displayPrizes]="displayPrizes"
           [index]="1"
           [targetSymbol]="targetSymbol"
           (stop)="onReelStop(1)"
-          [ngClass]="'small-symbol'" 
+          [ngClass]="'small-symbol'"
         ></app-reel>
       </div>
-  
+
       <!-- Surtidor Derecha -->
       <div class="relative h-full w-full flex items-center justify-center">
         <img src="../../../assets/img/Surtidor_derecha_A.webp" alt="Surtidor Derecha" class="object-contain h-full w-full z-20" />
         <app-reel
           class="absolute top-[30%] right-[19%] w-[50%] h-[30%] flex items-center justify-center z-10 bg-white"
           [duration]="duration"
+          [displayPrizes]="displayPrizes"
           [index]="2"
           [targetSymbol]="targetSymbol"
           (stop)="onReelStop(2)"
-          [ngClass]="'small-symbol'" 
+          [ngClass]="'small-symbol'"
         ></app-reel>
       </div>
     </section>

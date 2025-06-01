@@ -11,18 +11,22 @@ export class UtilService {
 
   private createAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
+
     if (!token) {
       console.error('🚨 No se encontró el token en localStorage');
       throw new Error('Token no disponible');
     }
+
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
+
     return headers;
   }
 
   public buildRequest<T>(method: string, url: string, body?: any, secure: boolean = true ): Observable<T> {
     let headers = secure? this.createAuthHeaders() : new HttpHeaders();
+
     switch (method.toLowerCase()) {
       case 'get':
         return this.http.get<T>(url, { headers });
@@ -36,5 +40,5 @@ export class UtilService {
         throw new Error('Método HTTP no soportado');
     }
   }
-
 }
+

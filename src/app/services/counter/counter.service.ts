@@ -10,14 +10,13 @@ import { map, Observable } from 'rxjs';
 })
 export class CounterService {
   private readonly baseUrl: string = environments.BASE_URL;
-  // Signal to store the counter value
   private counterSignal: WritableSignal<number> = signal(0);
 
   constructor(private http: HttpClient, private util: UtilService) {}
 
   // Method to get the current counter value from the server
   getCounter(): WritableSignal<number> {
-    const idAuth = localStorage.getItem('idAuth');  
+    const idAuth = localStorage.getItem('idAuth');
 
     if (!idAuth) {
       throw new Error('No se ha encontrado id_authentication en el almacenamiento local');
@@ -26,11 +25,11 @@ export class CounterService {
     const url = `${this.baseUrl}/counters/id_authentication/${idAuth}`;
     this.util.buildRequest<CounterResponse>('get', url,{}, false).pipe(
       map((response) => {
-        this.counterSignal.set(response.body.counter);  // Update the signal with the response
+        this.counterSignal.set(response.body.counter);
       })
-    ).subscribe();  // You can handle errors in your `buildRequest` method
+    ).subscribe();
 
-    return this.counterSignal;  // Return the signal to the component
+    return this.counterSignal;
   }
 
   postCounter(nuevoCounter: postCounter): Observable<any> {

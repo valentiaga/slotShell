@@ -32,31 +32,31 @@ export class PremiosService {
 
   getActivePrizes(estacionID?: number): Observable<PremioResponse> {
     let url = `${this.baseUrl}/prizes?active=true`;
-  
+
     if (estacionID) {
       url += `&tenantId=${estacionID}`;
     }
-  
-    return this.util.buildRequest<PremioResponse>('get', url);
+
+    return this.util.buildRequest<PremioResponse>('get', url, {}, false);
   }
-  
+
   postPremio(nuevoPremio: Premio): Observable<any> {
     const url = `${this.baseUrl}/prizes`;
     return this.util.buildRequest<any>('post', url, nuevoPremio);
   }
-  
+
   putPrize(prize: Premio): Observable<any> {
     const url = `${this.baseUrl}/prizes`;
     return this.util.buildRequest<any>('put', url, prize);
   }
-  
+
   deleteRow(id_prize: number): Observable<any> {
     const url = `${this.baseUrl}/prizes/${id_prize}`;
     return this.util.buildRequest<any>('delete', url).pipe(
       tap(() => this.premiosChanged.next())
     );
   }
-  
+
   clearCache() {
     this.premiosCache = null;
   }

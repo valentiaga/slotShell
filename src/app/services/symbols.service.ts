@@ -28,21 +28,21 @@ export class SymbolsService {
     return this.symbols[randomIndex];
   }
 
-  checkTargetSymbol(globalCounterValue: number): string | null {    
+  checkTargetSymbol(globalCounterValue: number): string | null {
     // Filtrar símbolos que cumplen con la condición de spins
     const validSymbols = this.symbols.filter((symbol) => {
       const maxSpins = this.symbolMaxSpins[symbol];
       return maxSpins > 0 && globalCounterValue % maxSpins === 0;
     });
-  
+
     if (validSymbols.length === 0) {
       return null;
     }
-  
+
     // Encontrar el símbolo con el mayor valor de spins
     let targetSymbol = validSymbols[0];
     let maxSpins = this.symbolMaxSpins[validSymbols[0]];
-  
+
     for (let symbol of validSymbols) {
       const spins = this.symbolMaxSpins[symbol];
       if (spins > maxSpins) {
@@ -50,37 +50,26 @@ export class SymbolsService {
         targetSymbol = symbol;
       }
     }
-  
+
     return targetSymbol;
   }
 
   public hasEnoughPrizes(): boolean {
     return this.activePrizes.length >= 3;
   }
-  
 
-  updateSymbolsAndSpins(estacionID: number): Observable<boolean> {
-    return this.premiosService.getActivePrizes(estacionID).pipe(
-      tap((response) => {
-        if (response.error) {
-          console.error('Error al obtener premios');
-        } else {
-          this.activePrizes = response.body;
-          this.symbols = this.activePrizes.map((premio: Premio) => premio.display);
-  
-          this.symbolMaxSpins = this.activePrizes.reduce((acc: { [key: string]: number }, premio: Premio) => {
-            acc[premio.display] = premio.spins;
-            return acc;
-          }, {});
-        }
-      }),
-      map(() => this.hasEnoughPrizes())
-    );
+  updateSymbolsAndSpins(activePrizes: Premio[]): Observable<boolean> {
+    this.activePrizes = activePrizes;
+    this.symbols = activePrizes.map((premio: Premio) => premio.display);
+    this.symbolMaxSpins = activePrizes.reduce((acc: { [key: string]: number }, premio: Premio) => {
+      acc[premio.display] = premio.spins;
+      return acc;
+    }, {});
+
+    return of(this.hasEnoughPrizes());
   }
 
   getPrizeBySymbol(symbol: string): Premio | null {
     return this.activePrizes.find(premio => premio.display === symbol) || null;
   }
-  
-    
 }

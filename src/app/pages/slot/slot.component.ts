@@ -1,3 +1,4 @@
+import { PremiosService } from './../../services/premios/premios.service';
 import { CommonModule, NgClass } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -13,6 +14,7 @@ import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { SocketService } from '../../services/socket/socket.service';
 import { CounterService } from '../../services/counter/counter.service';
 import { ConfettiService } from '../../services/confetti/confetti-service.service';
+import { Premio } from '../../interfaces/premio';
 
 @Component({
   selector: 'app-slot',
@@ -25,6 +27,8 @@ import { ConfettiService } from '../../services/confetti/confetti-service.servic
 export class SlotComponent implements OnInit {
   @ViewChildren(ReelComponent) reels!: QueryList<ReelComponent>;
   estacionID!: number;
+  activePrizes: Premio[] = [];
+  displayPrizes: string[] = [];
   randomSymbols: string[] = ['', '', ''];
   spinning: boolean[] = new Array<boolean>(3).fill(false);
   totalSpinCount: number = 0;
@@ -39,14 +43,19 @@ export class SlotComponent implements OnInit {
   isTestMode: boolean = false;
   isSpinDelayed: boolean = false;
 
-  constructor(private symbolsService: SymbolsService, private counterService: CounterService, private route: ActivatedRoute, private confettiService: ConfettiService) { }
+  constructor(
+    private symbolsService: SymbolsService,
+    private counterService: CounterService,
+    private route: ActivatedRoute,
+    private confettiService: ConfettiService,
+    private premiosService: PremiosService
+  ) { }
 
   async ngOnInit() {
     await this.setEstacion();
+    this.getActivePrizes();
     this.counterService.getCounter();
-    this.loadSymbols();
     this.createSocket();
-
     this.checkTestMode()
   }
 
@@ -62,6 +71,14 @@ export class SlotComponent implements OnInit {
     this.back = document.getElementById('audio_back') as HTMLAudioElement;
     this.win = document.getElementById('audio_win') as HTMLAudioElement;
     this.initialRandomSymbols();
+  }
+
+  getActivePrizes() {
+    this.premiosService.getActivePrizes(this.estacionID).subscribe((response) => {
+      this.displayPrizes = response.body.map(prize => prize.display);
+      this.activePrizes = response.body;
+      this.loadSymbols();
+    })
   }
 
   async setEstacion() {
@@ -87,7 +104,6 @@ export class SlotComponent implements OnInit {
 
     // Escuchar el evento para accionar la ruleta
     this.socketService.onRuletaAccionada((data) => {
-      console.log("🚀 ~ SlotComponent ~ this.socketService.onRuletaAccionada ~ data:", data)
       if (data.pinState === "LOW" && !this._isSpinning() && !this.isSpinDelayed) {
         this.generateRandomSymbols()
 
@@ -111,7 +127,7 @@ export class SlotComponent implements OnInit {
   }
 
   initialRandomSymbols() {
-    this.symbolsService.updateSymbolsAndSpins(this.estacionID).subscribe((hasEnough) => {
+    this.symbolsService.updateSymbolsAndSpins(this.activePrizes).subscribe((hasEnough) => {
       if (hasEnough) {
         for (let i = 0; i < 3; i++) {
           this.randomSymbols[i] = this.symbolsService.getRandomSymbol();
@@ -123,7 +139,7 @@ export class SlotComponent implements OnInit {
   }
 
   generateRandomSymbols() {
-    this.symbolsService.updateSymbolsAndSpins(this.estacionID).subscribe((hasEnough) => {
+    this.symbolsService.updateSymbolsAndSpins(this.activePrizes).subscribe((hasEnough) => {
       if (!hasEnough) {
         alert('Asegúrese de tener al menos 3 premios activos');
         return;
@@ -177,7 +193,7 @@ export class SlotComponent implements OnInit {
       if (match) {
         this.win?.play();
 
-        const symbol = this.reels.first.currentSymbol;  
+        const symbol = this.reels.first.currentSymbol;
         this._notifyWinning(symbol);
 
         this.reels.forEach((reel, index) => {
@@ -200,7 +216,7 @@ export class SlotComponent implements OnInit {
       // Verificar si es un premio monetario o no monetario
       let prizeDisplay = '';
       let prizeValue = 0;
-      
+
       if (prize.amount && prize.amount > 0) {
         // Premio monetario
         prizeDisplay = `$${prize.amount}`;
@@ -216,7 +232,7 @@ export class SlotComponent implements OnInit {
       }
 
       this.winningPrize = `🎉 ¡Has ganado ${prizeDisplay.toLowerCase()} en ${this.isla}! 🎉`;
-      
+
       const data = {
         valor: prizeValue,
         descripcion: prize.description || null,
@@ -228,10 +244,10 @@ export class SlotComponent implements OnInit {
     }
 
     this.showWinningMessage = true;
-    
+
     setTimeout(() => {
       this.showWinningMessage = false;
       this.winningPrize = '';
-    }, 4000); 
+    }, 4000);
   }
 }
