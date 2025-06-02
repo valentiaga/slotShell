@@ -11,12 +11,17 @@ export class SocketService {
 
   constructor() {
     // Conexión al servidor de sockets
-    this.socket = io(this.SERVER_URL);
+    this.socket = io(this.SERVER_URL, {
+      transports: ['websocket']
+    });
   }
 
   // Método para unirse a un room
   joinRoom(room: string): void {
     this.socket.emit('joinRoom', room);
+    this.socket.on('roomJoined', (room) => {
+      console.log(`✅ Cliente confirmado en room ${room}`);
+    });
   }
 
   // Escuchar eventos de "accionarRuleta"
