@@ -15,12 +15,11 @@ import { SocketService } from '../../services/socket/socket.service';
 import { CounterService } from '../../services/counter/counter.service';
 import { ConfettiService } from '../../services/confetti/confetti-service.service';
 import { Premio } from '../../interfaces/premio';
-import { NgxUiLoaderModule } from 'ngx-ui-loader';
 
 @Component({
   selector: 'app-slot',
   standalone: true,
-  imports: [ReelComponent, RouterOutlet, NgClass, CommonModule, NgxUiLoaderModule],
+  imports: [ReelComponent, RouterOutlet, NgClass, CommonModule],
   templateUrl: './slot.component.html',
   styleUrls: ['./slot.component.css'],
   changeDetection: ChangeDetectionStrategy.Default,
