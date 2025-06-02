@@ -7,13 +7,11 @@ import { io, Socket } from 'socket.io-client';
 export class SocketService {
 
   private socket: Socket;
-  private readonly SERVER_URL = 'api.shell-suarez.com';
+  private readonly SERVER_URL = 'https://api.shell-suarez.com';
 
   constructor() {
     // Conexión al servidor de sockets
-    this.socket = io(this.SERVER_URL, {
-      transports: ['websocket']
-    });
+    this.socket = io(this.SERVER_URL);
   }
 
   // Método para unirse a un room
