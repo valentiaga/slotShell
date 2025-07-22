@@ -78,24 +78,29 @@ export class AdminPageComponent implements OnInit{
       flex: 1,
       minWidth: 150,
       editable: true,
-      filter: "agTextColumnFilter", // Cambiar a texto para permitir búsqueda de descripciones
+      filter: "agTextColumnFilter",
       floatingFilter: this.displayFilterRow,
       cellRenderer: (params: any) => {
         // Si tiene amount, mostrar como monto monetario
-        if (params.value && typeof params.value === 'number') {
-          return `$ ${params.value}`;
+        if (params.data.amount !== null && params.data.amount !== undefined) {
+          return `${params.data.amount}`;
         }
         // Si no tiene amount pero tiene description, mostrar la descripción
         if (params.data.description) {
           return params.data.description;
         }
-        // Fallback para casos donde amount es string pero no es null/undefined
-        if (params.value && typeof params.value === 'string') {
-          return params.value;
-        }
         return 'N/A';
+      },
+      valueGetter: (params: any) => {
+        if (params.data.amount !== null && params.data.amount !== undefined) {
+          return params.data.amount;
+        }
+        if (params.data.description) {
+          return params.data.description;
+        }
+        return '';
       }
-    },  
+    },
     {
       headerName: 'Display',
       field: 'display',
@@ -181,6 +186,7 @@ export class AdminPageComponent implements OnInit{
       sortable: false,
       editable: false,
     }
+    
   ];
 
   constructor(
@@ -235,23 +241,50 @@ export class AdminPageComponent implements OnInit{
     });
   }
 
-  onCellValueChanged(event: CellValueChangedEvent) {
-    if (event.oldValue === event.newValue) {
-      return;
-    }
-    
-    this.premiosService.putPrize(event.data).subscribe({
-      next: () => {
-        this.toastService.showToast('success', 'Premio actualizado con éxito.');
-        this.premiosService.clearCache();
-        this.loadData();
-      },
-      error: (error) => {
-        this.toastService.showToast('error', 'Ocurrió un error al modificar el premio.');
-        console.error('Error al modificar el premio:', error);
-      }
-    });
+ onCellValueChanged(event: CellValueChangedEvent) {
+  if (event.oldValue === event.newValue) {
+    return;
   }
+  
+  let dataToSend = { ...event.data };
+  
+  // Si se modificó la columna 'amount' (Monto/Premio)
+  if (event.colDef.field === 'amount') {
+    const newValue = event.newValue;
+    
+    // Verificar si el valor es un número puro (sin texto adicional)
+    const trimmedValue = newValue.toString().trim();
+    const numericValue = parseFloat(trimmedValue);
+    
+    const isNumeric = !isNaN(numericValue) && 
+                     isFinite(numericValue) && 
+                     numericValue.toString() === trimmedValue;
+    
+    if (isNumeric) {
+      // Si es número puro, asignar a amount y limpiar description
+      dataToSend.amount = numericValue;
+      dataToSend.description = null;
+      
+    } else {
+      // Si es string o contiene texto, asignar a description y limpiar amount
+      dataToSend.amount = null;
+      dataToSend.description = newValue;
+    }
+  }
+  
+  this.premiosService.putPrize(dataToSend).subscribe({
+    next: () => {
+      this.toastService.showToast('success', 'Premio actualizado con éxito.');
+      this.premiosService.clearCache();
+      this.loadData();
+    },
+    error: (error) => {
+      this.toastService.showToast('error', 'Ocurrió un error al modificar el premio.');
+      console.error('Error al modificar el premio:', error);
+    }
+  });
+}
+
 
   deleteRow = (rowId: number) => {
     if (this.gridApi) {
