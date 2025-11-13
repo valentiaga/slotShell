@@ -42,6 +42,7 @@ export class SlotComponent implements OnInit {
   showWinningMessage: boolean = false;
   isTestMode: boolean = false;
   isSpinDelayed: boolean = false;
+  showIslaPlaying: boolean = true;
 
   constructor(
     private symbolsService: SymbolsService,
@@ -63,8 +64,9 @@ export class SlotComponent implements OnInit {
     const url = this.route.snapshot.url.map(segment => segment.path).join('/');
     this.isTestMode = url.includes('test');
 
-    if (this.isTestMode)
+    if (this.isTestMode){
       this.isla = 'Isla Test'
+    }
   }
 
   loadSymbols() {
@@ -105,19 +107,28 @@ export class SlotComponent implements OnInit {
     // Escuchar el evento para accionar la ruleta
     this.socketService.onRuletaAccionada((data) => {
       if (data.pinState === "LOW" && !this._isSpinning() && !this.isSpinDelayed) {
-        this.generateRandomSymbols()
-
         switch (data.pinData) {
-          case 13:
+          case 0:
             this.isla = 'Isla 1';
             break;
-          case 26:
+          case 5:
             this.isla = 'Isla 2';
             break;
-          case 19:
+          case 6:
             this.isla = 'Isla 3';
             break;
+          case 13:
+            this.isla = 'Isla 4';
+            break;
+          case 19:
+            this.isla = 'Isla 5';
+            break;
+          case 26:
+            this.isla = 'Isla 6';
+            break;
         }
+        
+        this.generateRandomSymbols()
       }
     });
   }
@@ -244,10 +255,12 @@ export class SlotComponent implements OnInit {
     }
 
     this.showWinningMessage = true;
+    this.showIslaPlaying = false;
 
     setTimeout(() => {
       this.showWinningMessage = false;
       this.winningPrize = '';
-    }, 4000);
+      this.showIslaPlaying = true;
+    }, 6000);
   }
 }

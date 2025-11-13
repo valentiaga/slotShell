@@ -3,6 +3,30 @@ m.small-symbol {
   /* Ajusta el tamaño del símbolo */
 }
 
+.isla-playing-message {
+  position: fixed;
+  bottom: 5%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px 50px;
+  border-radius: 15px;
+  text-align: center;
+  z-index: 10000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.05);
+  }
+}
+
 .winning-message {
   position: fixed;
   bottom: 70%;
