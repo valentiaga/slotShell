@@ -1,4 +1,3 @@
-import { PremiosService } from './../../services/premios/premios.service';
 import { CommonModule, NgClass } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -15,6 +14,7 @@ import { SocketService } from '../../services/socket/socket.service';
 import { CounterService } from '../../services/counter/counter.service';
 import { ConfettiService } from '../../services/confetti/confetti-service.service';
 import { Premio } from '../../interfaces/premio';
+import { PremiosService } from '../../services/premios/premios.service';
 
 @Component({
   selector: 'app-slot',
@@ -26,241 +26,412 @@ import { Premio } from '../../interfaces/premio';
 })
 export class SlotComponent implements OnInit {
   @ViewChildren(ReelComponent) reels!: QueryList<ReelComponent>;
-  estacionID!: number;
+  
+  stationId!: number;
   activePrizes: Premio[] = [];
   displayPrizes: string[] = [];
   randomSymbols: string[] = ['', '', ''];
   spinning: boolean[] = new Array<boolean>(3).fill(false);
   totalSpinCount: number = 0;
   targetSymbol?: string | null;
-  back?: HTMLAudioElement;
-  win?: HTMLAudioElement;
+  
+  private backAudio?: HTMLAudioElement;
+  private winAudio?: HTMLAudioElement;
+  
   socketService = inject(SocketService);
-  isla: string = '';
+  
+  islandName: string = '';
   duration = 2400;
   winningPrize: string = '';
   showWinningMessage: boolean = false;
   isTestMode: boolean = false;
   isSpinDelayed: boolean = false;
-  showIslaPlaying: boolean = true;
+  showIslandPlaying: boolean = true;
 
   constructor(
-    private symbolsService: SymbolsService,
-    private counterService: CounterService,
-    private route: ActivatedRoute,
-    private confettiService: ConfettiService,
-    private premiosService: PremiosService
+    private readonly symbolsService: SymbolsService, 
+    private readonly counterService: CounterService, 
+    private readonly route: ActivatedRoute, 
+    private readonly confettiService: ConfettiService,
+    private readonly premiosService: PremiosService
   ) { }
 
-  async ngOnInit() {
-    await this.setEstacion();
+  /**
+   * Inicializa el componente configurando la estación, premios y socket
+   */
+  async ngOnInit(): Promise<void> {
+    await this.setStation();
     this.getActivePrizes();
     this.counterService.getCounter();
     this.createSocket();
-    this.checkTestMode()
+    this.checkTestMode();
   }
 
-  checkTestMode() {
+  /**
+   * Verifica si el componente está en modo de prueba
+   */
+  private checkTestMode(): void {
     const url = this.route.snapshot.url.map(segment => segment.path).join('/');
     this.isTestMode = url.includes('test');
 
-    if (this.isTestMode){
-      this.isla = 'Isla Test'
+    if (this.isTestMode) {
+      this.islandName = 'Isla Test';
     }
   }
 
-  loadSymbols() {
-    this.back = document.getElementById('audio_back') as HTMLAudioElement;
-    this.win = document.getElementById('audio_win') as HTMLAudioElement;
+  /**
+   * Carga los símbolos y elementos de audio
+   */
+  private loadSymbols(): void {
+    this.loadAudioElements();
     this.initialRandomSymbols();
   }
 
-  getActivePrizes() {
-    this.premiosService.getActivePrizes(this.estacionID).subscribe((response) => {
+  /**
+   * Carga los elementos de audio del DOM
+   */
+  private loadAudioElements(): void {
+    this.backAudio = document.getElementById('audio_back') as HTMLAudioElement;
+    this.winAudio = document.getElementById('audio_win') as HTMLAudioElement;
+  }
+
+  /**
+   * Obtiene los premios activos para la estación actual
+   */
+  private getActivePrizes(): void {
+    this.premiosService.getActivePrizes(this.stationId).subscribe((response) => {
       this.displayPrizes = response.body.map(prize => prize.display);
       this.activePrizes = response.body;
       this.loadSymbols();
-    })
+    });
   }
 
-  async setEstacion() {
-    this.estacionID = this.route.snapshot.data['id'];
-    localStorage.setItem('idAuth', this.estacionID.toString());
-    switch (this.estacionID) {
-      case 1:
-        console.log('Estación Garay seleccionada');
-        break;
-      case 2:
-        console.log('Estación Matheu seleccionada');
-        break;
-      case 3:
-        console.log('Estación Roca seleccionada');
-        break;
-      default:
-        console.log('Estación no válida');
-    }
+  /**
+   * Configura la estación actual desde los datos de la ruta
+   */
+  private async setStation(): Promise<void> {
+    this.stationId = this.route.snapshot.data['id'];
+    localStorage.setItem('idAuth', this.stationId.toString());
+    this.logStationSelection();
   }
 
-  createSocket() {
-    this.socketService.joinRoom(this.estacionID.toString());
+  /**
+   * Registra en consola la estación seleccionada
+   */
+  private logStationSelection(): void {
+    const stationNames: { [key: number]: string } = {
+      1: 'Garay',
+      2: 'Matheu',
+      3: 'Roca'
+    };
+    
+    const stationName = stationNames[this.stationId] || 'no válida';
+    console.log(`Estación ${stationName} seleccionada`);
+  }
 
-    // Escuchar el evento para accionar la ruleta
+  /**
+   * Crea la conexión de socket y configura los listeners
+   */
+  private createSocket(): void {
+    this.socketService.joinRoom(this.stationId.toString());
+    this.setupSocketListeners();
+  }
+
+  /**
+   * Configura los listeners del socket para eventos de ruleta
+   */
+  private setupSocketListeners(): void {
     this.socketService.onRuletaAccionada((data) => {
-      if (data.pinState === "LOW" && !this._isSpinning() && !this.isSpinDelayed) {
-        switch (data.pinData) {
-          case 0:
-            this.isla = 'Isla 1';
-            break;
-          case 5:
-            this.isla = 'Isla 2';
-            break;
-          case 6:
-            this.isla = 'Isla 3';
-            break;
-          case 13:
-            this.isla = 'Isla 4';
-            break;
-          case 19:
-            this.isla = 'Isla 5';
-            break;
-          case 26:
-            this.isla = 'Isla 6';
-            break;
-        }
-        
-        this.generateRandomSymbols()
+      if (this.canSpin(data)) {
+        this.setIslandNameByPin(data.pinData);
+        this.generateRandomSymbols();
       }
     });
   }
 
-  private _isSpinning() {
+  /**
+   * Verifica si se puede realizar un giro
+   * @param data - Datos del evento de socket
+   * @returns true si se puede girar
+   */
+  private canSpin(data: any): boolean {
+    return data.pinState === "LOW" && !this.isSpinning() && !this.isSpinDelayed;
+  }
+
+  /**
+   * Establece el nombre de la isla según el pin activado
+   * @param pinData - Número del pin activado
+   */
+  private setIslandNameByPin(pinData: number): void {
+    const islandMap: { [key: number]: string } = {
+      0: 'Isla 1',
+      5: 'Isla 2',
+      6: 'Isla 3',
+      13: 'Isla 4',
+      19: 'Isla 5',
+      26: 'Isla 6'
+    };
+    
+    this.islandName = islandMap[pinData] || this.islandName;
+  }
+
+  /**
+   * Verifica si algún reel está girando
+   * @returns true si al menos un reel está girando
+   */
+  private isSpinning(): boolean {
     return this.spinning.some(reel => reel === true);
   }
 
-  initialRandomSymbols() {
+  /**
+   * Genera los símbolos aleatorios iniciales
+   */
+  private initialRandomSymbols(): void {
     this.symbolsService.updateSymbolsAndSpins(this.activePrizes).subscribe((hasEnough) => {
       if (hasEnough) {
-        for (let i = 0; i < 3; i++) {
-          this.randomSymbols[i] = this.symbolsService.getRandomSymbol();
-        }
+        this.setInitialRandomSymbols();
       } else {
         alert('Asegúrese de tener al menos 3 premios activos');
       }
     });
   }
 
-  generateRandomSymbols() {
+  /**
+   * Establece los símbolos aleatorios iniciales en los reels
+   */
+  private setInitialRandomSymbols(): void {
+    for (let i = 0; i < 3; i++) {
+      this.randomSymbols[i] = this.symbolsService.getRandomSymbol();
+    }
+  }
+
+  /**
+   * Genera símbolos aleatorios y ejecuta el giro de los reels
+   */
+  public generateRandomSymbols(): void {
     this.symbolsService.updateSymbolsAndSpins(this.activePrizes).subscribe((hasEnough) => {
       if (!hasEnough) {
         alert('Asegúrese de tener al menos 3 premios activos');
         return;
       }
 
-      let globalCounterValue = 0;
-      this.counterService.incrementCounter(this.estacionID).subscribe({
-        next: (response) => {
-          globalCounterValue = response.body.globalCounterValue;
-          this.spinning.fill(true);
-          this.targetSymbol = this.symbolsService.checkTargetSymbol(globalCounterValue);
-          let symbols: any = [];
-
-          if (this.targetSymbol === null) {
-            do {
-              symbols = [
-                this.symbolsService.getRandomSymbol(),
-                this.symbolsService.getRandomSymbol(),
-                this.symbolsService.getRandomSymbol()
-              ];
-            } while (symbols[0] === symbols[1] && symbols[1] === symbols[2]);
-          } else {
-            symbols = [this.targetSymbol, this.targetSymbol, this.targetSymbol];
-          }
-
-          this.back?.play();
-          this.win?.pause();
-          this.reels.forEach((reel, index) => {
-            reel.blink = false;
-            const direction = index === 1 ? 'down' : 'up';
-            const delay = index === 1 ? 500 : index === 0 ? 0 : 250;
-            setTimeout(() => {
-              reel.startSpinning(symbols[index], direction, index === 1 ? 4000 : 3200);
-            }, delay);
-          });
-        },
-        error: (err) => {
-          console.error('Hubo un error al incrementar el contador:', err);
-        }
-      });
+      this.incrementCounterAndSpin();
     });
   }
 
-  onReelStop(index: number) {
-    this.spinning[index] = false;
-    if (!this.spinning.includes(true)) {
-      this.back?.pause();
-      const match = this.reels.toArray().every((reel, index, array) => {
-        return reel.currentSymbol === array[0].currentSymbol;
-      });
-      if (match) {
-        this.win?.play();
-
-        const symbol = this.reels.first.currentSymbol;
-        this._notifyWinning(symbol);
-
-        this.reels.forEach((reel, index) => {
-          reel.blink = true;
-        });
-
-        this.confettiService.launchConfetti();
-        this.isSpinDelayed = true;
-        setTimeout( () => {
-          this.isSpinDelayed = false;
-        }
-        , 10000)
+  /**
+   * Incrementa el contador y ejecuta el giro
+   */
+  private incrementCounterAndSpin(): void {
+    this.counterService.incrementCounter(this.stationId).subscribe({
+      next: (response) => {
+        const globalCounterValue = response.body.globalCounterValue;
+        this.executeSpin(globalCounterValue);
+      },
+      error: (err) => {
+        console.error('Hubo un error al incrementar el contador:', err);
       }
+    });
+  }
+
+  /**
+   * Ejecuta el giro de los reels con los símbolos determinados
+   * @param globalCounterValue - Valor del contador global
+   */
+  private executeSpin(globalCounterValue: number): void {
+    this.spinning.fill(true);
+    this.targetSymbol = this.symbolsService.checkTargetSymbol(globalCounterValue);
+    const symbols = this.determineSymbols();
+
+    this.playBackgroundAudio();
+    this.startReelsSpinning(symbols);
+  }
+
+  /**
+   * Determina los símbolos para el giro actual
+   * @returns Array de símbolos para cada reel
+   */
+  private determineSymbols(): string[] {
+    if (this.targetSymbol === null || this.targetSymbol === undefined) {
+      return this.generateNonMatchingSymbols();
+    } else {
+      return [this.targetSymbol, this.targetSymbol, this.targetSymbol];
     }
   }
 
-  private _notifyWinning(symbol: any) {
+  /**
+   * Genera símbolos que no coincidan todos
+   * @returns Array de símbolos no coincidentes
+   */
+  private generateNonMatchingSymbols(): string[] {
+    let symbols: string[];
+    do {
+      symbols = [
+        this.symbolsService.getRandomSymbol(),
+        this.symbolsService.getRandomSymbol(),
+        this.symbolsService.getRandomSymbol()
+      ];
+    } while (symbols[0] === symbols[1] && symbols[1] === symbols[2]);
+    return symbols;
+  }
+
+  /**
+   * Reproduce el audio de fondo y pausa el audio de victoria
+   */
+  private playBackgroundAudio(): void {
+    this.backAudio?.play();
+    this.winAudio?.pause();
+  }
+
+  /**
+   * Inicia el giro de todos los reels
+   * @param symbols - Array de símbolos para cada reel
+   */
+  private startReelsSpinning(symbols: string[]): void {
+    this.reels.forEach((reel, index) => {
+      reel.startSpinning(symbols[index]);
+    });
+  }
+
+  /**
+   * Maneja el evento de parada de un reel
+   * @param index - Índice del reel que se detuvo
+   */
+  onReelStop(index: number): void {
+    this.spinning[index] = false;
+    
+    if (!this.spinning.includes(true)) {
+      this.handleAllReelsStopped();
+    }
+  }
+
+  /**
+   * Maneja el evento cuando todos los reels se han detenido
+   */
+  private handleAllReelsStopped(): void {
+    this.backAudio?.pause();
+    
+    if (this.checkForMatch()) {
+      this.handleWin();
+    }
+  }
+
+  /**
+   * Verifica si todos los reels muestran el mismo símbolo
+   * @returns true si hay coincidencia
+   */
+  private checkForMatch(): boolean {
+    return this.reels.toArray().every((reel, index, array) => {
+      return reel.currentSymbol === array[0].currentSymbol;
+    });
+  }
+
+  /**
+   * Maneja la lógica cuando se gana un premio
+   */
+  private handleWin(): void {
+    this.winAudio?.play();
+
+    const symbol = this.reels.first.currentSymbol;  
+    this.showPrizeMessage(symbol);
+    this.activateReelBlink();
+    this.confettiService.launchConfetti();
+    this.setSpinDelay();
+  }
+
+  /**
+   * Activa el efecto de parpadeo en todos los reels
+   */
+  private activateReelBlink(): void {
+    this.reels.forEach((reel) => {
+      reel.blink = true;
+    });
+  }
+
+  /**
+   * Establece un delay temporal para evitar giros inmediatos
+   */
+  private setSpinDelay(): void {
+    this.isSpinDelayed = true;
+    setTimeout(() => {
+      this.isSpinDelayed = false;
+    }, 10000);
+  }
+
+  /**
+   * Muestra el mensaje del premio ganado
+   * @param symbol - Símbolo del premio ganado
+   */
+  private showPrizeMessage(symbol: any): void {
     const prize = this.symbolsService.getPrizeBySymbol(symbol);
+    
     if (prize) {
-      // Verificar si es un premio monetario o no monetario
-      let prizeDisplay = '';
-      let prizeValue = 0;
-
-      if (prize.amount && prize.amount > 0) {
-        // Premio monetario
-        prizeDisplay = `$${prize.amount}`;
-        prizeValue = prize.amount;
-      } else if (prize.description) {
-        // Premio no monetario
-        prizeDisplay = prize.description;
-        prizeValue = 0; // O un valor simbólico si es necesario para el backend
-      } else {
-        // Fallback
-        prizeDisplay = prize.title;
-        prizeValue = 0;
-      }
-
-      this.winningPrize = `🎉 ¡Has ganado ${prizeDisplay.toLowerCase()} en ${this.isla}! 🎉`;
-
-      const data = {
-        valor: prizeValue,
-        descripcion: prize.description || null,
-        isla: this.isla,
-        estacion: this.estacionID
-      };
-
-      this.socketService.emit('premioGanado', data);
+      const { prizeDisplay, prizeValue } = this.getPrizeDisplayInfo(prize);
+      this.winningPrize = `🎉 ¡Has ganado ${prizeDisplay.toLowerCase()} en ${this.islandName}! 🎉`;
+      this.emitPrizeWon(prize, prizeValue);
     }
 
+    this.displayWinningMessage();
+  }
+
+  /**
+   * Obtiene la información de visualización del premio
+   * @param prize - Premio ganado
+   * @returns Objeto con la visualización y valor del premio
+   */
+  private getPrizeDisplayInfo(prize: Premio): { prizeDisplay: string; prizeValue: number } {
+    if (prize.amount && prize.amount > 0) {
+      return {
+        prizeDisplay: `$${prize.amount}`,
+        prizeValue: prize.amount
+      };
+    } else if (prize.description) {
+      return {
+        prizeDisplay: prize.description,
+        prizeValue: 0
+      };
+    } else {
+      return {
+        prizeDisplay: prize.title,
+        prizeValue: 0
+      };
+    }
+  }
+
+  /**
+   * Emite el evento de premio ganado al socket
+   * @param prize - Premio ganado
+   * @param prizeValue - Valor del premio
+   */
+  private emitPrizeWon(prize: Premio, prizeValue: number): void {
+    const data = {
+      valor: prizeValue,
+      descripcion: prize.description || null,
+      isla: this.islandName,
+      estacion: this.stationId
+    };
+
+    this.socketService.emit('premioGanado', data);
+  }
+
+  /**
+   * Muestra el mensaje de victoria temporalmente
+   */
+  private displayWinningMessage(): void {
     this.showWinningMessage = true;
-    this.showIslaPlaying = false;
+    this.showIslandPlaying = false;
 
     setTimeout(() => {
-      this.showWinningMessage = false;
-      this.winningPrize = '';
-      this.showIslaPlaying = true;
+      this.hideWinningMessage();
     }, 6000);
+  }
+
+  /**
+   * Oculta el mensaje de victoria
+   */
+  private hideWinningMessage(): void {
+    this.showWinningMessage = false;
+    this.winningPrize = '';
+    this.showIslandPlaying = true;
   }
 }

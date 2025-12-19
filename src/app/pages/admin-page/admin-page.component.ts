@@ -42,13 +42,14 @@ import { DeleteButtonCellRendererComponent } from '../../components/delete-butto
   styleUrl: './admin-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AdminPageComponent implements OnInit{
+export class AdminPageComponent implements OnInit {
   pagination = true;
   paginationPageSize = 10;
   paginationPageSizeSelector = [10, 20, 50, 100];
   displayFilterRow = false;
   showModal: boolean = false;
   themeClass = 'ag-theme-quartz-dark';
+  
   private gridApi: GridApi<any> | undefined;
   rowData: Premio[] = [];
   counterSignal = this.counterService.getCounter();
@@ -190,23 +191,35 @@ export class AdminPageComponent implements OnInit{
   ];
 
   constructor(
-    public premiosService: PremiosService,
-    public counterService: CounterService,
-    private router: Router,
-    private toastService: ToastService
+    public readonly premiosService: PremiosService,
+    public readonly counterService: CounterService,
+    private readonly router: Router,
+    private readonly toastService: ToastService
   ) {}
 
+  /**
+   * Obtiene el ID único de cada fila para ag-Grid
+   * @param params - Parámetros de la fila
+   * @returns ID de la fila como string
+   */
   public getRowId: GetRowIdFunc = (params: GetRowIdParams) => {
     return params.data.id_prize.toString();
   };
 
-  handleFormSubmit(formData: any) {
-    console.log('Recibo los datos! ', formData);
-    this.agregarPremio(formData);
+  /**
+   * Maneja el envío del formulario del modal
+   * @param formData - Datos del formulario
+   */
+  handleFormSubmit(formData: any): void {
+    this.addPrize(formData);
     this.closeModal();
   }
 
-  agregarPremio(data: Premio): void {
+  /**
+   * Agrega un nuevo premio
+   * @param data - Datos del premio a agregar
+   */
+  private addPrize(data: Premio): void {
     this.premiosService.postPremio(data).subscribe({
       next: () => {
         this.toastService.showToast('success', 'Premio agregado con éxito.');
@@ -219,16 +232,26 @@ export class AdminPageComponent implements OnInit{
     });
   }
 
-  ngOnInit() {
+  /**
+   * Inicializa el componente obteniendo el contador
+   */
+  ngOnInit(): void {
     this.counterService.getCounter();
   }
 
-  onGridReady(params: GridReadyEvent) {
+  /**
+   * Maneja el evento cuando la grilla está lista
+   * @param params - Parámetros del evento GridReady
+   */
+  onGridReady(params: GridReadyEvent): void {
     this.gridApi = params.api;
     this.loadData();
   }
 
-  loadData() {
+  /**
+   * Carga los datos de premios en la grilla
+   */
+  loadData(): void {
     this.premiosService.getPremios().subscribe({
       next: (data) => {
         this.rowData = data.body;
@@ -241,98 +264,165 @@ export class AdminPageComponent implements OnInit{
     });
   }
 
- onCellValueChanged(event: CellValueChangedEvent) {
-  if (event.oldValue === event.newValue) {
-    return;
+  /**
+   * Maneja el cambio de valor en una celda de la grilla
+   * @param event - Evento de cambio de valor de celda
+   */
+  onCellValueChanged(event: CellValueChangedEvent): void {
+    if (this.hasValueChanged(event)) {
+      const dataToSend = this.prepareDataForUpdate(event);
+      this.updatePrize(dataToSend);
+    }
   }
-  
-  let dataToSend = { ...event.data };
-  
-  // Si se modificó la columna 'amount' (Monto/Premio)
-  if (event.colDef.field === 'amount') {
-    const newValue = event.newValue;
+
+  /**
+   * Verifica si el valor de la celda realmente cambió
+   * @param event - Evento de cambio de valor
+   * @returns true si el valor cambió
+   */
+  private hasValueChanged(event: CellValueChangedEvent): boolean {
+    return event.oldValue !== event.newValue;
+  }
+
+  /**
+   * Prepara los datos para actualizar según el campo modificado
+   * @param event - Evento de cambio de valor
+   * @returns Datos preparados para enviar
+   */
+  private prepareDataForUpdate(event: CellValueChangedEvent): any {
+    const dataToSend = { ...event.data };
     
-    // Verificar si el valor es un número puro (sin texto adicional)
-    const trimmedValue = newValue.toString().trim();
-    const numericValue = parseFloat(trimmedValue);
+    if (event.colDef.field === 'amount') {
+      this.handleAmountFieldChange(dataToSend, event.newValue);
+    }
     
-    const isNumeric = !isNaN(numericValue) && 
-                     isFinite(numericValue) && 
-                     numericValue.toString() === trimmedValue;
-    
-    if (isNumeric) {
-      // Si es número puro, asignar a amount y limpiar description
-      dataToSend.amount = numericValue;
+    return dataToSend;
+  }
+
+  /**
+   * Maneja el cambio en el campo de monto/premio
+   * @param dataToSend - Datos a enviar
+   * @param newValue - Nuevo valor del campo
+   */
+  private handleAmountFieldChange(dataToSend: any, newValue: any): void {
+    if (this.isNumericValue(newValue)) {
+      dataToSend.amount = parseFloat(newValue.toString().trim());
       dataToSend.description = null;
-      
     } else {
-      // Si es string o contiene texto, asignar a description y limpiar amount
       dataToSend.amount = null;
       dataToSend.description = newValue;
     }
   }
-  
-  this.premiosService.putPrize(dataToSend).subscribe({
-    next: () => {
-      this.toastService.showToast('success', 'Premio actualizado con éxito.');
-      this.premiosService.clearCache();
-      this.loadData();
-    },
-    error: (error) => {
-      this.toastService.showToast('error', 'Ocurrió un error al modificar el premio.');
-      console.error('Error al modificar el premio:', error);
-    }
-  });
-}
 
+  /**
+   * Verifica si un valor es numérico puro
+   * @param value - Valor a verificar
+   * @returns true si es un número válido
+   */
+  private isNumericValue(value: any): boolean {
+    const trimmedValue = value.toString().trim();
+    const numericValue = parseFloat(trimmedValue);
+    
+    return !isNaN(numericValue) && 
+           isFinite(numericValue) && 
+           numericValue.toString() === trimmedValue;
+  }
 
-  deleteRow = (rowId: number) => {
-    if (this.gridApi) {
-      const rowNode = this.gridApi.getRowNode(rowId.toString());
-
-      if (rowNode) {
-        
-        this.premiosService.deleteRow(rowId).subscribe({
-          next: () => {
-            this.gridApi?.applyTransaction({ remove: [rowNode.data] });
-            this.premiosService.clearCache();
-            this.toastService.showToast('success', 'Premio eliminado con éxito.');
-          },
-          error: (error) => {
-            this.toastService.showToast('error', 'Ocurrió un error al eliminar el premio.');
-            console.error('Error al eliminar el premio:', error);
-          }
-        });
-      } else {
-        console.warn(`No se encontró ninguna fila con id ${rowId}`);
+  /**
+   * Actualiza un premio en el servidor
+   * @param data - Datos del premio a actualizar
+   */
+  private updatePrize(data: any): void {
+    this.premiosService.putPrize(data).subscribe({
+      next: () => {
+        this.toastService.showToast('success', 'Premio actualizado con éxito.');
+        this.premiosService.clearCache();
+        this.loadData();
+      },
+      error: (error) => {
+        this.toastService.showToast('error', 'Ocurrió un error al modificar el premio.');
+        console.error('Error al modificar el premio:', error);
       }
-    }
-  };  
+    });
+  }
 
-  closeModal() {
+
+  /**
+   * Elimina una fila de la grilla
+   * @param rowId - ID de la fila a eliminar
+   */
+  deleteRow = (rowId: number): void => {
+    if (!this.gridApi) {
+      return;
+    }
+
+    const rowNode = this.gridApi.getRowNode(rowId.toString());
+
+    if (rowNode) {
+      this.deletePrizeFromServer(rowId, rowNode);
+    } else {
+      console.warn(`No se encontró ninguna fila con id ${rowId}`);
+    }
+  };
+
+  /**
+   * Elimina un premio del servidor y actualiza la grilla
+   * @param rowId - ID del premio a eliminar
+   * @param rowNode - Nodo de la fila en la grilla
+   */
+  private deletePrizeFromServer(rowId: number, rowNode: any): void {
+    this.premiosService.deleteRow(rowId).subscribe({
+      next: () => {
+        this.gridApi?.applyTransaction({ remove: [rowNode.data] });
+        this.premiosService.clearCache();
+        this.toastService.showToast('success', 'Premio eliminado con éxito.');
+      },
+      error: (error) => {
+        this.toastService.showToast('error', 'Ocurrió un error al eliminar el premio.');
+        console.error('Error al eliminar el premio:', error);
+      }
+    });
+  }  
+
+  /**
+   * Cierra el modal de agregar/editar premio
+   */
+  closeModal(): void {
     this.showModal = false;
   }
 
-  redirect() {
+  /**
+   * Redirige a la página de la estación correspondiente
+   */
+  redirect(): void {
     const idAuth = localStorage.getItem('idAuth');
     
-    if (idAuth) {
-      switch (idAuth) {
-        case '1':
-          this.router.navigate(['/garay']);
-          break;
-        case '2':
-          this.router.navigate(['/matheu']);
-          break;
-        case '3':
-          this.router.navigate(['/roca']);
-          break;
-        default:
-          console.warn('idAuth no válido');
-          break;
-      }
-    } else {
+    if (!idAuth) {
       console.warn('idAuth no encontrado en localStorage');
+      return;
     }
-  }  
+
+    const route = this.getRouteByStationId(idAuth);
+    
+    if (route) {
+      this.router.navigate([route]);
+    } else {
+      console.warn('idAuth no válido');
+    }
+  }
+
+  /**
+   * Obtiene la ruta correspondiente al ID de estación
+   * @param stationId - ID de la estación
+   * @returns Ruta de navegación o null
+   */
+  private getRouteByStationId(stationId: string): string | null {
+    const routes: { [key: string]: string } = {
+      '1': '/garay',
+      '2': '/matheu',
+      '3': '/roca'
+    };
+    
+    return routes[stationId] || null;
+  }
 }
