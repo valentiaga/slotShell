@@ -25,39 +25,65 @@ import { ToastService } from '../../services/toast/toast.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPageComponent {
-  private fb = inject(FormBuilder)
-  public authService = inject (AuthService);
-  private router = inject(Router)
+  private readonly fb = inject(FormBuilder);
+  public readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
+  
   public hidePassword: boolean = true;
-  private toastService = inject(ToastService);
 
   public loginForm: FormGroup = this.fb.group({
     username: ['', [Validators.required]],
     password: ['', [Validators.required, Validators.minLength(8)]]
-  })
+  });
 
+  /**
+   * Alterna la visibilidad de la contraseña
+   */
   togglePasswordVisibility(): void {
     this.hidePassword = !this.hidePassword;
   }
 
-  get userName(){
+  /**
+   * Obtiene el valor del campo username
+   * @returns Valor del username
+   */
+  get userName(): string {
     return this.loginForm.get('username')?.value;
   }
-  get password(){
+  
+  /**
+   * Obtiene el valor del campo password
+   * @returns Valor del password
+   */
+  get password(): string {
     return this.loginForm.get('password')?.value;
   }
 
-  login(){
-    const {username, password} = this.loginForm.value
+  /**
+   * Ejecuta el proceso de login
+   */
+  login(): void {
+    const { username, password } = this.loginForm.value;
 
-    this.authService.login(username,password)
+    this.authService.login(username, password)
       .subscribe({
-        next: () => {
-          this.router.navigateByUrl('/panel')},
-        error: () => {
-          console.log('error al loguear');
-          this.toastService.showToast('error', 'Usuario o contraseña incorrectos');
-        }
-      })
+        next: () => this.handleLoginSuccess(),
+        error: () => this.handleLoginError()
+      });
+  }
+
+  /**
+   * Maneja el éxito del login
+   */
+  private handleLoginSuccess(): void {
+    this.router.navigateByUrl('/panel');
+  }
+
+  /**
+   * Maneja el error del login
+   */
+  private handleLoginError(): void {
+    this.toastService.showToast('error', 'Usuario o contraseña incorrectos');
   }
 }

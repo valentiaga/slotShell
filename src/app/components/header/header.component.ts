@@ -12,49 +12,71 @@ import { Subscription } from 'rxjs';
   styleUrl: './header.component.css'
 })
 export class HeaderComponent {
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
-  username: String = 'Admin';
-  shell_add: string = '';
+  username: string = 'Admin';
+  shellAddress: string = '';
   private subscription: Subscription = new Subscription();
 
-  ngOnInit() {
+  /**
+   * Inicializa el componente y configura las suscripciones
+   */
+  ngOnInit(): void {
+    this.setupAuthSubscription();
+  }
+
+  /**
+   * Configura la suscripción al estado de autenticación
+   */
+  private setupAuthSubscription(): void {
     this.subscription.add(
       this.authService.isAuthenticated$.subscribe(isAuthenticated => {
         if (isAuthenticated) {
-          const idAuth = localStorage.getItem('idAuth');
-
-          if (idAuth) {
-            const idAuthNumber = parseInt(idAuth, 10);
-            this.updateShellAddress(idAuthNumber);
-          }
+          this.handleAuthenticatedUser();
         }
       })
     );
   }
 
-  logout(){
-    this.authService.logout()
+  /**
+   * Maneja la lógica cuando el usuario está autenticado
+   */
+  private handleAuthenticatedUser(): void {
+    const idAuth = localStorage.getItem('idAuth');
+
+    if (idAuth) {
+      const idAuthNumber = parseInt(idAuth, 10);
+      this.updateShellAddress(idAuthNumber);
+    }
   }
 
-  isAdminPage(): any {    
+  /**
+   * Cierra la sesión del usuario
+   */
+  logout(): void {
+    this.authService.logout();
+  }
+
+  /**
+   * Verifica si la página actual es la página de administración
+   * @returns true si está en la página de administración
+   */
+  isAdminPage(): boolean {
     return this.router.url === '/panel';
   }
 
-  private updateShellAddress(idAuth: number) {
-    switch (idAuth) {
-      case 1:
-        this.shell_add = 'GARAY - Av. Independencia 3190';
-        break;
-      case 2:
-        this.shell_add = 'MATHEU - Matheu Cordoba';
-        break;
-      case 3:
-        this.shell_add = 'ROCA - Av. Independencia, Julio Argentino Roca 3315';
-        break;
-      default:
-        this.shell_add = 'Ubicación no definida';
-    }
+  /**
+   * Actualiza la dirección de la estación Shell según el ID de autenticación
+   * @param idAuth - ID de autenticación de la estación
+   */
+  private updateShellAddress(idAuth: number): void {
+    const addresses: { [key: number]: string } = {
+      1: 'GARAY - Av. Independencia 3190',
+      2: 'MATHEU - Matheu Cordoba',
+      3: 'ROCA - Av. Independencia, Julio Argentino Roca 3315'
+    };
+    
+    this.shellAddress = addresses[idAuth] || 'Ubicación no definida';
   }
 }
