@@ -1,0 +1,7 @@
+.trash-btn {
+  opacity: 0;
+}
+
+.image-tile:hover .trash-btn {
+  opacity: 1;
+}

@@ -6,11 +6,13 @@ import { ImagesService } from '../../services/images/images.service';
 import { CloudinaryService } from '../../services/cloudinary/cloudinary.service';
 import { ToastService } from '../../services/toast/toast.service';
 import { CloudinaryImage } from '../../interfaces/image';
+import { PrizeImageSelectorComponent } from './prize-image-selector/prize-image-selector.component';
+import { DeleteImageModalComponent } from './delete-image-modal/delete-image-modal.component';
 
 @Component({
   selector: 'app-modal',
   standalone: true,
-  imports: [NgIf, NgClass, NgFor, FormsModule, DiasCellRendererComponent],
+  imports: [NgIf, NgClass, NgFor, FormsModule, DiasCellRendererComponent, PrizeImageSelectorComponent, DeleteImageModalComponent],
   templateUrl: './modal.component.html',
   styleUrl: './modal.component.css'
 })
@@ -82,8 +84,8 @@ export class ModalComponent implements OnInit {
     return (this.existingPrizes || []).some((p) => p?.display === image.url_img);
   }
 
-  requestDeleteImage(image: CloudinaryImage, event: MouseEvent): void {
-    event.stopPropagation();
+  requestDeleteImage(image: CloudinaryImage, event?: MouseEvent): void {
+    event?.stopPropagation();
 
     if (!image?.id_img) {
       this._toastService.showToast('error', 'No se pudo eliminar la imagen (id no disponible)');

@@ -7,11 +7,3 @@
     opacity: 0.5;
     pointer-events: none;
 }
-
-.trash-btn {
-    opacity: 0;
-}
-
-.image-tile:hover .trash-btn {
-    opacity: 1;
-}

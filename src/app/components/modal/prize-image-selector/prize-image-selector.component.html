@@ -1,0 +1,59 @@
+<div class="flex items-center justify-between mb-2">
+  <h4 class="text-sm font-medium">Selecciona una imagen</h4>
+  <button type="button" (click)="refresh.emit()" class="text-xs text-gray-600 hover:text-gray-800">
+    Refrescar
+  </button>
+</div>
+
+<!-- Vista previa de imagen seleccionada -->
+<div *ngIf="selectedUrl" class="mb-3 p-2 bg-gray-100 rounded flex items-center gap-2">
+  <img [src]="selectedUrl" alt="Seleccionada" class="w-12 h-12 object-cover rounded">
+  <span class="text-sm flex-1">{{ selectedImageName }}</span>
+  <button type="button" (click)="clearSelection.emit()" class="text-red-500 hover:text-red-700">
+    ✕
+  </button>
+</div>
+
+<!-- Grid de imágenes con scroll -->
+<div class="grid grid-cols-5 gap-1.5 max-h-40 overflow-y-auto p-1">
+  <button type="button"
+    (click)="upload.emit()"
+    [disabled]="isUploadingImage()"
+    class="h-14 rounded border-2 border-dashed border-gray-300 text-gray-700 hover:border-blue-400 hover:text-blue-700 transition-all flex flex-col items-center justify-center bg-white">
+    <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16" fill="currentColor">
+      <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
+    </svg>
+    <span class="text-xs font-medium">
+      <span *ngIf="!isUploadingImage()">Subir</span>
+      <span *ngIf="isUploadingImage()">...</span>
+    </span>
+  </button>
+
+  <div *ngFor="let image of images"
+    class="image-tile relative group"
+    [ngClass]="{
+      'cursor-pointer': !(isImageInUse(image) && selectedUrl !== image.url_img),
+      'cursor-not-allowed opacity-50': (isImageInUse(image) && selectedUrl !== image.url_img)
+    }"
+    (click)="toggleImageSelection.emit(image)">
+    <img [src]="image.url_img"
+      [alt]="image.name_img"
+      loading="lazy"
+      class="w-full h-14 object-cover rounded border-2 transition-all"
+      [ngClass]="{
+        'border-blue-500 ring-2 ring-blue-300': selectedUrl === image.url_img,
+        'border-gray-300 group-hover:border-blue-400': selectedUrl !== image.url_img && !(isImageInUse(image) && selectedUrl !== image.url_img)
+      }">
+    <button type="button"
+      (click)="requestDeleteImage(image, $event)"
+      class="trash-btn absolute top-1 right-1 z-10 transition-opacity bg-white text-gray-700 hover:text-red-600 rounded p-1 shadow">
+      <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16" fill="currentColor">
+        <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<p class="text-xs text-gray-500 mt-2">
+  💡 Las imágenes deben ser cuadradas 1024x1024 en formato WebP o PNG
+</p>

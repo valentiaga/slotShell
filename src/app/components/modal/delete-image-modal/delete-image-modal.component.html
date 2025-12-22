@@ -1,0 +1,37 @@
+<div class="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50">
+  <div class="bg-white rounded-lg shadow w-[420px] p-4">
+    <h4 class="text-lg font-semibold text-gray-900">Eliminar imagen</h4>
+    <p *ngIf="prizesUsingPendingImage.length === 0" class="text-sm text-gray-700 mt-2">
+      ¿Seguro que querés eliminar esta imagen? Esta acción no se puede deshacer.
+    </p>
+
+    <div *ngIf="prizesUsingPendingImage.length > 0" class="mt-3 p-3 rounded bg-red-50 border border-red-200">
+      <p class="text-sm text-red-700 font-medium">
+        No se puede eliminar esta imagen porque está asociada a un premio.
+      </p>
+      <div class="mt-2">
+        <p class="text-xs text-red-700 font-medium">Premio que la está usando:</p>
+        <div class="mt-1 space-y-1">
+          <p *ngFor="let prize of prizesUsingPendingImage" class="text-xs text-red-700">
+            {{ prize?.id_prize }} - {{ prize?.title }}
+          </p>
+        </div>
+      </div>
+      <p class="text-xs text-red-700 mt-1">
+        Primero eliminá el premio que la esté usando y volvé a intentarlo.
+      </p>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+      <button type="button" (click)="cancel.emit()" [disabled]="isDeletingImage"
+        class="text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm px-4 py-2">
+        Cancelar
+      </button>
+      <button type="button" *ngIf="prizesUsingPendingImage.length === 0" (click)="confirm.emit()" [disabled]="isDeletingImage"
+        class="bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm px-4 py-2">
+        <span *ngIf="!isDeletingImage">Eliminar</span>
+        <span *ngIf="isDeletingImage">Eliminando...</span>
+      </button>
+    </div>
+  </div>
+</div>
