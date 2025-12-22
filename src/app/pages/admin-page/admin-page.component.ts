@@ -77,7 +77,7 @@ export class AdminPageComponent implements OnInit {
       headerName: 'Monto/Premio',
       field: 'amount',
       flex: 1,
-      minWidth: 150,
+      minWidth: 170,
       editable: true,
       filter: "agTextColumnFilter",
       floatingFilter: this.displayFilterRow,
@@ -106,31 +106,63 @@ export class AdminPageComponent implements OnInit {
       headerName: 'Display',
       field: 'display',
       flex: 1,
-      minWidth: 150,
+      minWidth: 100,
+      cellStyle: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
       editable: (params) => {
         const regex = /\bprizes\/\b/;
         return !regex.test(params.data.display);
 
       },
-      filter: "agTextColumnFilter",
       floatingFilter: this.displayFilterRow,
+      cellRenderer: (params: ICellRendererParams) => {
+        const value = params.value;
+
+        if (this.isImageDisplay(value)) {
+          const escaped = value.replace(/"/g, '&quot;');
+          return `
+            <div style="display:flex;align-items:center;justify-content:center;height:100%;">
+              <img
+                src="${escaped}"
+                alt="display"
+                loading="lazy"
+                style="width:44px;height:44px;object-fit:contain;" />
+            </div>
+          `;
+        }
+
+        return value ?? '';
+      },
     },
     {
       headerName: 'Contador',
+      cellStyle: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
       field: 'spins',
       flex: 1,
-      minWidth: 150,
+      minWidth: 120,
       editable: true,
       filter: "agNumberColumnFilter",
       floatingFilter: this.displayFilterRow,
     },
     {
       headerName: 'Activo?',
+      cellStyle: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
       field: 'is_active',
       flex: 1,
-      minWidth: 150,
+      minWidth: 100,
       editable: false,
-      filter: "agTextColumnFilter",
+
       floatingFilter: this.displayFilterRow,
       cellRenderer: IsActiveCellRendererComponent,
       cellRendererParams: {
@@ -160,7 +192,7 @@ export class AdminPageComponent implements OnInit {
       headerName: 'Hora inicio',
       field: 'start_time',
       flex: 1,
-      minWidth: 250,
+      minWidth: 150,
       editable: true,
       filter: "agTextColumnFilter",
       floatingFilter: this.displayFilterRow,
@@ -169,13 +201,13 @@ export class AdminPageComponent implements OnInit {
       headerName: 'Hora fin',
       field: 'end_time',
       flex: 1,
-      minWidth: 250,
+      minWidth: 150,
       editable: true,
       filter: "agTextColumnFilter",
       floatingFilter: this.displayFilterRow,
     },
     {
-      headerName: 'Acciones',
+      headerName: '',
       width: 60,
       cellRenderer: DeleteButtonCellRendererComponent,
       cellRendererParams: {
@@ -188,6 +220,14 @@ export class AdminPageComponent implements OnInit {
       editable: false,
     }
   ];
+
+  private isImageDisplay(value: unknown): value is string {
+    if (typeof value !== 'string') {
+      return false;
+    }
+
+    return value.includes('cloudinary.com') || value.includes('prizes/') || value.includes('http');
+  }
 
   constructor(
     public readonly premiosService: PremiosService,
