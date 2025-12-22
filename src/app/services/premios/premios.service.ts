@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { Premio, PremioResponse } from '../../interfaces/premio';
-import { Observable, of, tap } from 'rxjs';
+import { Observable, of, switchMap, tap } from 'rxjs';
 import { UtilService } from '../util/util.service';
 import { environments } from '../../../assets/environment';
 
@@ -22,7 +22,7 @@ export class PremiosService {
   getPremios(stationId?: number): Observable<PremioResponse> {
     const url = this.buildPrizesUrl(stationId);
     const isSecure = !stationId;
-    
+
     return this.util.buildRequest<PremioResponse>('get', url, {}, isSecure).pipe(
       tap((premios) => console.log(premios))
     );
@@ -35,11 +35,11 @@ export class PremiosService {
    */
   private buildPrizesUrl(stationId?: number): string {
     let url = `${this.baseUrl}/prizes`;
-    
+
     if (stationId) {
       url += `?tenantId=${stationId}`;
     }
-    
+
     return url;
   }
 
@@ -93,10 +93,11 @@ export class PremiosService {
    * @param prizeId - ID del premio a eliminar
    * @returns Observable con la respuesta
    */
-  deleteRow(prizeId: number): Observable<any> {
+  deleteRow(prizeId: number): Observable<PremioResponse> {
     const url = `${this.baseUrl}/prizes/${prizeId}`;
     return this.util.buildRequest<any>('delete', url).pipe(
-      tap(() => this.premiosChanged.next())
+      tap(() => this.premiosChanged.next()),
+      switchMap(() => this.getPremios())
     );
   }
 

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
 import { NgClass, NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DiasCellRendererComponent } from '../dias-cell-renderer/dias-cell-renderer.component';
@@ -30,7 +30,13 @@ export class ModalComponent implements OnInit {
   showImageSelector = true;
   selectedImageName: string = '';
   prizeType: 'monetario' | 'no_monetario' = 'monetario';
-  isUploadingImage: boolean = false;
+  displayMode: 'image' | 'text' = 'image';
+  isUploadingImage = signal(false);
+  currentStep: 1 | 2 = 1;
+  isDeleteImageModalOpen: boolean = false;
+  isDeletingImage: boolean = false;
+  imagePendingDelete: CloudinaryImage | null = null;
+  prizesUsingPendingImage: any[] = [];
 
   formData: { [key: string]: any } = {
     title: '',
@@ -56,8 +62,80 @@ export class ModalComponent implements OnInit {
    * @param form - Formulario con los datos del premio
    */
   onSubmit(form: any): void {
+    if (this.currentStep !== 2) {
+      return;
+    }
     const submitData = this.prepareSubmitData();
     this.formSubmit.emit(submitData);
+  }
+
+  nextStep(): void {
+    if (this.currentStep === 1 && this.isStep1Valid) {
+      this.currentStep = 2;
+    }
+  }
+
+  isImageInUse(image: CloudinaryImage): boolean {
+    if (!image?.url_img) {
+      return false;
+    }
+    return (this.existingPrizes || []).some((p) => p?.display === image.url_img);
+  }
+
+  requestDeleteImage(image: CloudinaryImage, event: MouseEvent): void {
+    event.stopPropagation();
+
+    if (!image?.id_img) {
+      this._toastService.showToast('error', 'No se pudo eliminar la imagen (id no disponible)');
+      return;
+    }
+
+    this.prizesUsingPendingImage = (this.existingPrizes || []).filter((p) => p?.display === image.url_img);
+
+    this.imagePendingDelete = image;
+    this.isDeleteImageModalOpen = true;
+  }
+
+  cancelDeleteImage(): void {
+    this.isDeleteImageModalOpen = false;
+    this.imagePendingDelete = null;
+    this.prizesUsingPendingImage = [];
+  }
+
+  confirmDeleteImage(): void {
+    if (!this.imagePendingDelete?.id_img) {
+      return;
+    }
+
+    if (this.prizesUsingPendingImage.length > 0) {
+      this._toastService.showToast('error', 'No se puede eliminar: la imagen está asociada a un premio');
+      return;
+    }
+
+    this.isDeletingImage = true;
+
+    this._imagesService.deleteImage(this.imagePendingDelete.id_img, this.imagePendingDelete.public_id).subscribe({
+      next: () => {
+        if (this.formData['display'] === this.imagePendingDelete?.url_img) {
+          this.clearSelection();
+        }
+
+        this._toastService.showToast('success', 'Imagen eliminada');
+        this.loadImages();
+        this.isDeletingImage = false;
+        this.cancelDeleteImage();
+      },
+      error: () => {
+        this._toastService.showToast('error', 'Ocurrió un error al eliminar la imagen');
+        this.isDeletingImage = false;
+      }
+    });
+  }
+
+  prevStep(): void {
+    if (this.currentStep === 2) {
+      this.currentStep = 1;
+    }
   }
 
   /**
@@ -66,13 +144,13 @@ export class ModalComponent implements OnInit {
    */
   private prepareSubmitData(): any {
     const submitData = { ...this.formData };
-    
+
     if (this.prizeType === 'no_monetario') {
       submitData['amount'] = null;
     } else {
       submitData['description'] = null;
     }
-    
+
     return submitData;
   }
 
@@ -94,15 +172,44 @@ export class ModalComponent implements OnInit {
     }
   }
 
+  private startUploading(): boolean {
+    if (this.isUploadingImage()) {
+      return false;
+    }
+    this.isUploadingImage.set(true);
+    return true;
+  }
+
+  private stopUploading(): void {
+    this.isUploadingImage.set(false);
+  }
+
+  private handleUploadWidgetClosed(): void {
+    console.log('Cloudinary upload widget closed');
+    this.stopUploading();
+  }
+
   /**
    * Abre el widget de Cloudinary para subir una nueva imagen
    */
-  openCloudinaryUpload(): void {
-    this.isUploadingImage = true;
-    
-    this._cloudinaryService.openUploadWidget(
+  async openCloudinaryUpload(): Promise<void> {
+    try {
+      if (!this.startUploading()) {
+        return;
+      }
+
+      await this.openUploadWidget();
+    } catch (e) {
+      this.stopUploading();
+      this._toastService.showToast('error', 'No se pudo abrir el widget de subida');
+    }
+  }
+
+  private async openUploadWidget(): Promise<void> {
+    await this._cloudinaryService.openUploadWidget(
       (result) => this.handleUploadSuccess(result),
-      (error) => this.handleUploadError(error)
+      (error) => this.handleUploadError(error),
+      () => this.handleUploadWidgetClosed()
     );
   }
 
@@ -112,17 +219,20 @@ export class ModalComponent implements OnInit {
    */
   private handleUploadSuccess(result: any): void {
     const imageData = this.createImageData(result);
+    this.saveUploadedImage(imageData, result);
+  }
 
+  private saveUploadedImage(imageData: any, result: any): void {
     this._imagesService.saveImage(imageData).subscribe({
       next: () => {
         this._toastService.showToast('success', 'Imagen subida exitosamente');
         this.selectUploadedImage(result);
         this.loadImages();
-        this.isUploadingImage = false;
+        this.stopUploading();
       },
       error: () => {
         this._toastService.showToast('error', 'Error al guardar imagen en BD');
-        this.isUploadingImage = false;
+        this.stopUploading();
       }
     });
   }
@@ -156,7 +266,7 @@ export class ModalComponent implements OnInit {
    */
   private handleUploadError(error: any): void {
     this._toastService.showToast('error', 'Error al subir imagen');
-    this.isUploadingImage = false;
+    this.stopUploading();
   }
 
   /**
@@ -164,8 +274,11 @@ export class ModalComponent implements OnInit {
    * @param image - Imagen a seleccionar/deseleccionar
    */
   toggleImageSelection(image: any): void {
+    if (this.isImageInUse(image) && this.formData['display'] !== image.url_img) {
+      return;
+    }
     const isCurrentlySelected = this.formData['display'] === image.url_img;
-    
+
     if (isCurrentlySelected) {
       this.clearSelection();
     } else {
@@ -187,15 +300,21 @@ export class ModalComponent implements OnInit {
    * Alterna la visibilidad del selector de imágenes
    */
   toggleSelector(): void {
-    this.showImageSelector = !this.showImageSelector;
-    this.formData['display'] = ''; 
+    this.displayMode = this.displayMode === 'image' ? 'text' : 'image';
+    this.showImageSelector = this.displayMode === 'image';
+    this.clearSelection();
+  }
+
+  onDisplayModeChange(): void {
+    this.showImageSelector = this.displayMode === 'image';
+    this.clearSelection();
   }
 
   /**
    * Limpia la selección de imagen actual
    */
   clearSelection(): void {
-    this.formData['display'] = ''; 
+    this.formData['display'] = '';
     this.selectedImageName = '';
   }
 
@@ -238,8 +357,16 @@ export class ModalComponent implements OnInit {
    * @returns true si el formulario es válido, false en caso contrario
    */
   get isFormValid(): boolean {
-    const baseValidation = this.validateBaseFields();
-    return this.validateByPrizeType(baseValidation);
+    return this.isStep1Valid && this.isStep2Valid;
+  }
+
+  get isStep1Valid(): boolean {
+    return this.validateBaseFields();
+  }
+
+  get isStep2Valid(): boolean {
+    const displayValid = !!this.formData['display'];
+    return this.validateByPrizeType(displayValid);
   }
 
   /**
@@ -248,7 +375,6 @@ export class ModalComponent implements OnInit {
    */
   private validateBaseFields(): boolean {
     return !!(this.formData['title'] &&
-      this.formData['display'] &&
       this.formData['spins'] &&
       !this.isSpinDuplicate);
   }

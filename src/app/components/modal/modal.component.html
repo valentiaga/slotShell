@@ -8,166 +8,266 @@
       </div>
       <div class="p-4 md:p-5">
         <form class="space-y-4" (ngSubmit)="onSubmit(form)" #form="ngForm">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <div
+                class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold"
+                [ngClass]="currentStep === 1 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-700'">
+                1
+              </div>
+              <span class="text-sm font-medium" [ngClass]="currentStep === 1 ? 'text-gray-900' : 'text-gray-600'">
+                Configuración
+              </span>
+            </div>
+            <div class="flex-1 mx-3 h-0.5" [ngClass]="currentStep === 2 ? 'bg-blue-600' : 'bg-gray-300'"></div>
+            <div class="flex items-center gap-2">
+              <div
+                class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold"
+                [ngClass]="currentStep === 2 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-700'">
+                2
+              </div>
+              <span class="text-sm font-medium" [ngClass]="currentStep === 2 ? 'text-gray-900' : 'text-gray-600'">
+                Premio
+              </span>
+            </div>
+          </div>
+
           <div class="flex flex-col">
-            <div class="flex gap-4 my-2">
-              <div>
-                <label for="nombre" class="block mb-2 w-full text-sm font-medium text-gray-900">Nombre</label>
-                <input type="string" name="nombre" [(ngModel)]="formData['title']" id="nombre"
-                  class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5" />
-              </div>
-            </div>
-
-            <!-- Tipo de premio -->
-            <div class="my-4">
-              <label class="block mb-2 text-sm font-medium text-gray-900">Tipo de premio</label>
-              <div class="flex gap-4">
-                <div class="flex items-center">
-                  <input id="monetario" name="tipo_premio" type="radio" value="monetario" 
-                    [(ngModel)]="prizeType" (change)="onTipoChange()"
-                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
-                  <label for="monetario" class="ms-2 text-sm font-medium text-gray-900">Monetario</label>
-                </div>
-                <div class="flex items-center">
-                  <input id="no_monetario" name="tipo_premio" type="radio" value="no_monetario" 
-                    [(ngModel)]="prizeType" (change)="onTipoChange()"
-                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
-                  <label for="no_monetario" class="ms-2 text-sm font-medium text-gray-900">No monetario</label>
-                </div>
-              </div>
-            </div>
-
-            <!-- Campo de monto (solo si es monetario) -->
-            <div *ngIf="prizeType === 'monetario'" class="my-2">
-              <label for="monto" class="block mb-2 w-full text-sm font-medium text-gray-900">Monto</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 start-0 flex items-center ps-1 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
-                    fill="#B7B7B7">
-                    <path
-                      d="M441-120v-86q-53-12-91.5-46T293-348l74-30q15 48 44.5 73t77.5 25q41 0 69.5-18.5T587-356q0-35-22-55.5T463-458q-86-27-118-64.5T313-614q0-65 42-101t86-41v-84h80v84q50 8 82.5 36.5T651-650l-74 32q-12-32-34-48t-60-16q-44 0-67 19.5T393-614q0 33 30 52t104 40q69 20 104.5 63.5T667-358q0 71-42 108t-104 46v84h-80Z" />
-                  </svg>
-                </div>
-                <input type="number" name="monto" [(ngModel)]="formData['amount']" id="monto"
-                  class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5 ps-8" />
-              </div>
-            </div>
-
-            <!-- Campo de descripción (solo si es no monetario) -->
-            <div *ngIf="prizeType === 'no_monetario'" class="my-2">
-              <label for="descripcion" class="block mb-2 w-full text-sm font-medium text-gray-900">Descripción del premio</label>
-              <input type="text" name="descripcion" [(ngModel)]="formData['description']" id="descripcion"
-                placeholder="Ej: Lavado gratis, Descuento 50%, etc."
-                class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"/>
-            </div>
-
-            <label for="display" class="block mb-2 w-full text-sm font-medium text-gray-900 my-2">Imagen del Premio</label>
-            
-            <!-- Botón para subir nueva imagen -->
-            <div class="flex gap-2 mb-2" *ngIf="showImageSelector">
-              <button type="button" (click)="openCloudinaryUpload()"
-                [disabled]="isUploadingImage"
-                class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-400">
-                <span *ngIf="!isUploadingImage">Subir Nueva Imagen</span>
-                <span *ngIf="isUploadingImage">Subiendo...</span>
-              </button>
-              <button type="button" (click)="toggleSelector()"
-                class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded">
-                {{ showImageSelector ? 'Texto' : 'Imagen' }}
-              </button>
-            </div>
-
-            <!-- Input para texto personalizado (cuando showImageSelector = false) -->
-            <div *ngIf="!showImageSelector" class="relative flex items-center">
-              <input type="text" name="display" [(ngModel)]="formData['display']" id="display"
-                class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
-                maxlength="4"
-                placeholder="Máx. 4 caracteres"/>
-                <button type="button" (click)="toggleSelector()"
-                class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded">
-                {{ showImageSelector ? 'Texto' : 'Imagen' }}
-              </button>
-            </div>
-
-            <!-- Selector de imágenes existentes -->
-            <div *ngIf="showImageSelector && images" class="mt-2 p-4 bg-white shadow rounded">
-              <h4 class="text-sm font-medium mb-2">Selecciona una imagen</h4>
-
-              <!-- Vista previa de imagen seleccionada -->
-              <div *ngIf="formData['display']" class="mb-3 p-2 bg-gray-100 rounded flex items-center gap-2">
-                <img [src]="formData['display']" alt="Seleccionada" 
-                  class="w-12 h-12 object-cover rounded">
-                <span class="text-sm flex-1">{{ selectedImageName }}</span>
-                <button type="button" (click)="clearSelection()" 
-                  class="text-red-500 hover:text-red-700">
-                  ✕
-                </button>
-              </div>
-
-              <!-- Grid de imágenes con scroll -->
-              <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto p-2">
-                <div *ngFor="let image of images" 
-                  class="relative cursor-pointer group"
-                  (click)="toggleImageSelection(image)">
-                  <img [src]="image.url_img" 
-                    [alt]="image.name_img"
-                    loading="lazy"
-                    class="w-full h-20 object-cover rounded border-2 transition-all"
-                    [ngClass]="{
-                      'border-blue-500 ring-2 ring-blue-300': formData['display'] === image.url_img,
-                      'border-gray-300 group-hover:border-blue-400': formData['display'] !== image.url_img
-                    }">
-                  <!-- Badge "NUEVO" si es imagen recién subida -->
-                  <span *ngIf="image.is_new" 
-                    class="absolute top-1 right-1 bg-green-500 text-white text-xs px-1 rounded">
-                    NUEVO
-                  </span>
+            <div *ngIf="currentStep === 1">
+              <div class="flex gap-4 my-2">
+                <div>
+                  <label for="nombre" class="block mb-2 w-full text-sm font-medium text-gray-900">Nombre</label>
+                  <input type="string" name="nombre" [(ngModel)]="formData['title']" id="nombre"
+                    class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5" />
                 </div>
               </div>
 
-              <p class="text-xs text-gray-500 mt-2">
-                💡 Las imágenes deben ser cuadradas 1024x1024 en formato WebP o PNG
-              </p>
+              <label for="dias" class="block mb-2 text-sm font-medium text-gray-900 my-2">Días</label>
+              <app-dias-cell-renderer [diasModal]="formData['active_days']" [isModal]="true"
+                (selectedDays)="onSelectedDays($event)" class="my-2"></app-dias-cell-renderer>
+
+              <div class="flex gap-4 my-2">
+                <div>
+                  <label for="desde" class="block mb-2 text-sm font-medium text-gray-900">Desde</label>
+                  <input type="time" name="desde" [(ngModel)]="formData['start_time']" id="desde"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5" />
+                </div>
+                <div>
+                  <label for="hasta" class="block mb-2 text-sm font-medium text-gray-900">Hasta</label>
+                  <input type="time" name="hasta" [(ngModel)]="formData['end_time']" id="hasta"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5" />
+                </div>
+                <div>
+                  <label for="spins" class="block mb-2 w-full text-sm font-medium text-gray-900">Contador</label>
+                  <input type="number" name="spins" [(ngModel)]="formData['spins']" id="spins" min="1"
+                    class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
+                    (input)="validateSpins(formData['spins'])" />
+                  <p *ngIf="isSpinDuplicate" class="text-red-600 text-sm mt-1">
+                    Este contador ya está en uso en el premio {{ prizeId }}.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center my-4">
+                <input id="is_active" [(ngModel)]="formData['is_active']" name="is_active" type="checkbox" checked />
+                <label for="is_active" class="ms-2 text-sm font-medium text-gray-900">Activo</label>
+              </div>
             </div>
 
-            <label for="dias" class="block mb-2 text-sm font-medium text-gray-900 my-2">Días</label>
-            <app-dias-cell-renderer [diasModal]="formData['active_days']" [isModal]="true"
-              (selectedDays)="onSelectedDays($event)" class="my-2"></app-dias-cell-renderer>
-            
-            <div class="flex gap-4 my-2">
-              <div>
-                <label for="desde" class="block mb-2 text-sm font-medium text-gray-900">Desde</label>
-                <input type="time" name="desde" [(ngModel)]="formData['start_time']" id="desde"
-                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5" />
+            <div *ngIf="currentStep === 2">
+              <!-- Tipo de premio -->
+              <div class="my-4">
+                <label class="block mb-2 text-sm font-medium text-gray-900">Tipo de premio</label>
+                <div class="flex gap-4">
+                  <div class="flex items-center">
+                    <input id="monetario" name="tipo_premio" type="radio" value="monetario"
+                      [(ngModel)]="prizeType" (change)="onTipoChange()"
+                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
+                    <label for="monetario" class="ms-2 text-sm font-medium text-gray-900">Monetario</label>
+                  </div>
+                  <div class="flex items-center">
+                    <input id="no_monetario" name="tipo_premio" type="radio" value="no_monetario"
+                      [(ngModel)]="prizeType" (change)="onTipoChange()"
+                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
+                    <label for="no_monetario" class="ms-2 text-sm font-medium text-gray-900">No monetario</label>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label for="hasta" class="block mb-2 text-sm font-medium text-gray-900">Hasta</label>
-                <input type="time" name="hasta" [(ngModel)]="formData['end_time']" id="hasta"
-                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5" />
+
+              <!-- Campo de monto (solo si es monetario) -->
+              <div *ngIf="prizeType === 'monetario'" class="my-2">
+                <label for="monto" class="block mb-2 w-full text-sm font-medium text-gray-900">Monto</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 start-0 flex items-center ps-1 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                      fill="#B7B7B7">
+                      <path
+                        d="M441-120v-86q-53-12-91.5-46T293-348l74-30q15 48 44.5 73t77.5 25q41 0 69.5-18.5T587-356q0-35-22-55.5T463-458q-86-27-118-64.5T313-614q0-65 42-101t86-41v-84h80v84q50 8 82.5 36.5T651-650l-74 32q-12-32-34-48t-60-16q-44 0-67 19.5T393-614q0 33 30 52t104 40q69 20 104.5 63.5T667-358q0 71-42 108t-104 46v84h-80Z" />
+                    </svg>
+                  </div>
+                  <input type="number" name="monto" [(ngModel)]="formData['amount']" id="monto"
+                    class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5 ps-8" />
+                </div>
               </div>
-              <div>
-                <label for="spins" class="block mb-2 w-full text-sm font-medium text-gray-900">Contador</label>
-                <input type="number" name="spins" [(ngModel)]="formData['spins']" id="spins" min="1"
+
+              <!-- Campo de descripción (solo si es no monetario) -->
+              <div *ngIf="prizeType === 'no_monetario'" class="my-2">
+                <label for="descripcion" class="block mb-2 w-full text-sm font-medium text-gray-900">Descripción del premio</label>
+                <input type="text" name="descripcion" [(ngModel)]="formData['description']" id="descripcion"
+                  placeholder="Ej: Lavado gratis, Descuento 50%, etc."
+                  class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"/>
+              </div>
+
+              <div class="my-2">
+                <label class="block mb-2 text-sm font-medium text-gray-900">Mostrar como</label>
+                <div class="flex gap-4">
+                  <div class="flex items-center">
+                    <input id="display_image" name="display_mode" type="radio" value="image"
+                      [(ngModel)]="displayMode" (change)="onDisplayModeChange()"
+                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
+                    <label for="display_image" class="ms-2 text-sm font-medium text-gray-900">Imagen</label>
+                  </div>
+                  <div class="flex items-center">
+                    <input id="display_text" name="display_mode" type="radio" value="text"
+                      [(ngModel)]="displayMode" (change)="onDisplayModeChange()"
+                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
+                    <label for="display_text" class="ms-2 text-sm font-medium text-gray-900">Texto</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Input para texto personalizado -->
+              <div *ngIf="displayMode === 'text'" class="relative">
+                <input type="text" name="display" [(ngModel)]="formData['display']" id="display"
                   class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
-                  (input)="validateSpins(formData['spins'])" />
-                <p *ngIf="isSpinDuplicate" class="text-red-600 text-sm mt-1">
-                  Este contador ya está en uso en el premio {{ prizeId }}.
+                  maxlength="5"
+                  placeholder="Ej: 2x1, OFF, VIP (máx. 5)"/>
+              </div>
+
+              <!-- Selector de imágenes existentes -->
+              <div *ngIf="displayMode === 'image' && images" class="mt-2 p-4 bg-white shadow rounded">
+                <div class="flex items-center justify-between mb-2">
+                  <h4 class="text-sm font-medium">Selecciona una imagen</h4>
+                  <button type="button" (click)="loadImages()" class="text-xs text-gray-600 hover:text-gray-800">
+                    Refrescar
+                  </button>
+                </div>
+
+                <!-- Vista previa de imagen seleccionada -->
+                <div *ngIf="formData['display']" class="mb-3 p-2 bg-gray-100 rounded flex items-center gap-2">
+                  <img [src]="formData['display']" alt="Seleccionada"
+                    class="w-12 h-12 object-cover rounded">
+                  <span class="text-sm flex-1">{{ selectedImageName }}</span>
+                  <button type="button" (click)="clearSelection()"
+                    class="text-red-500 hover:text-red-700">
+                    ✕
+                  </button>
+                </div>
+
+                <!-- Grid de imágenes con scroll -->
+                <div class="grid grid-cols-5 gap-1.5 max-h-40 overflow-y-auto p-1">
+                  <button type="button"
+                    (click)="openCloudinaryUpload()"
+                    [disabled]="isUploadingImage()"
+                    class="h-14 rounded border-2 border-dashed border-gray-300 text-gray-700 hover:border-blue-400 hover:text-blue-700 transition-all flex flex-col items-center justify-center bg-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16" fill="currentColor">
+                      <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
+                    </svg>
+                    <span class="text-xs font-medium">
+                      <span *ngIf="!isUploadingImage()">Subir</span>
+                      <span *ngIf="isUploadingImage()">...</span>
+                    </span>
+                  </button>
+
+                  <div *ngFor="let image of images"
+                    class="image-tile relative group"
+                    [ngClass]="{
+                      'cursor-pointer': !(isImageInUse(image) && formData['display'] !== image.url_img),
+                      'cursor-not-allowed opacity-50': (isImageInUse(image) && formData['display'] !== image.url_img)
+                    }"
+                    (click)="toggleImageSelection(image)">
+                    <img [src]="image.url_img"
+                      [alt]="image.name_img"
+                      loading="lazy"
+                      class="w-full h-14 object-cover rounded border-2 transition-all"
+                      [ngClass]="{
+                        'border-blue-500 ring-2 ring-blue-300': formData['display'] === image.url_img,
+                        'border-gray-300 group-hover:border-blue-400': formData['display'] !== image.url_img && !(isImageInUse(image) && formData['display'] !== image.url_img)
+                      }">
+                    <button type="button"
+                      (click)="requestDeleteImage(image, $event)"
+                      class="trash-btn absolute top-1 right-1 z-10 transition-opacity bg-white text-gray-700 hover:text-red-600 rounded p-1 shadow">
+                      <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16" fill="currentColor">
+                        <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">
+                  💡 Las imágenes deben ser cuadradas 1024x1024 en formato WebP o PNG
                 </p>
               </div>
             </div>
-            
-            <div class="flex items-center my-4">
-              <input id="is_active" [(ngModel)]="formData['is_active']" name="is_active" type="checkbox" checked />
-              <label for="is_active" class="ms-2 text-sm font-medium text-gray-900">Activo</label>
+          </div>
+
+          <div *ngIf="isDeleteImageModalOpen" class="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white rounded-lg shadow w-[420px] p-4">
+              <h4 class="text-lg font-semibold text-gray-900">Eliminar imagen</h4>
+              <p *ngIf="prizesUsingPendingImage.length === 0" class="text-sm text-gray-700 mt-2">
+                ¿Seguro que querés eliminar esta imagen? Esta acción no se puede deshacer.
+              </p>
+
+              <div *ngIf="prizesUsingPendingImage.length > 0" class="mt-3 p-3 rounded bg-red-50 border border-red-200">
+                <p class="text-sm text-red-700 font-medium">
+                  No se puede eliminar esta imagen porque está asociada a un premio.
+                </p>
+                <div class="mt-2">
+                  <p class="text-xs text-red-700 font-medium">Premio que la está usando:</p>
+                  <div class="mt-1 space-y-1">
+                    <p *ngFor="let prize of prizesUsingPendingImage" class="text-xs text-red-700">
+                      {{ prize?.id_prize }} - {{ prize?.title }}
+                    </p>
+                  </div>
+                </div>
+                <p class="text-xs text-red-700 mt-1">
+                  Primero eliminá el premio que la esté usando y volvé a intentarlo.
+                </p>
+              </div>
+
+              <div class="flex justify-end gap-2 mt-4">
+                <button type="button" (click)="cancelDeleteImage()" [disabled]="isDeletingImage"
+                  class="text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm px-4 py-2">
+                  Cancelar
+                </button>
+                <button type="button" *ngIf="prizesUsingPendingImage.length === 0" (click)="confirmDeleteImage()" [disabled]="isDeletingImage"
+                  class="bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm px-4 py-2">
+                  <span *ngIf="!isDeletingImage">Eliminar</span>
+                  <span *ngIf="isDeletingImage">Eliminando...</span>
+                </button>
+              </div>
             </div>
           </div>
-          
+
           <div class="flex justify-end mb-4">
-            <button
+            <button type="button"
               class="text-gray-700 bg-gray-300 hover:bg-gray-400 focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm px-5 py-2.5 mx-2"
               (click)="onClose()">
               Cancelar
             </button>
-            <button type="submit" [disabled]="!isFormValid" [ngClass]="{ 'btn-disabled': !isFormValid }"
+
+            <button type="button" *ngIf="currentStep === 2"
+              class="text-gray-700 bg-gray-300 hover:bg-gray-400 focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm px-5 py-2.5 mx-2"
+              (click)="prevStep()">
+              Anterior
+            </button>
+
+            <button type="button" *ngIf="currentStep === 1" [disabled]="!isStep1Valid" [ngClass]="{ 'btn-disabled': !isStep1Valid }"
+              class="add-button text-white text-base font-bold py-1 px-4 focus:ring-2 focus:ring-white focus:outline-none rounded"
+              (click)="nextStep()">
+              Siguiente
+            </button>
+
+            <button type="submit" *ngIf="currentStep === 2" [disabled]="!isFormValid" [ngClass]="{ 'btn-disabled': !isFormValid }"
               class="add-button text-white text-base font-bold py-1 px-4 focus:ring-2 focus:ring-white focus:outline-none rounded">
               Agregar
             </button>
