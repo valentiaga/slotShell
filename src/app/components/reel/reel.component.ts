@@ -22,6 +22,7 @@ export class ReelComponent implements OnInit, OnDestroy {
   currentSymbol: string = this.symbolsService.getRandomSymbol();
   spinning: boolean = false;
   private spinTimeoutId?: ReturnType<typeof setTimeout>;
+  private stopTimeoutId?: ReturnType<typeof setTimeout>;
   private spinStartMs: number = 0;
   blink: boolean = false;
   imageLoaded: boolean = false;
@@ -74,6 +75,32 @@ export class ReelComponent implements OnInit, OnDestroy {
     this.initializeSpinning();
     this.startSpinAnimation();
     this.scheduleStop(symbol);
+  }
+
+  startSpinningWithoutFinal(): void {
+    this.finalSymbol = undefined;
+    this.didLockFinalSymbol = false;
+    this.initializeSpinning();
+    this.startSpinAnimation();
+  }
+
+  finishSpin(symbol: string, stopAfterMs: number): void {
+    this.finalSymbol = symbol;
+
+    if (this.stopTimeoutId) {
+      clearTimeout(this.stopTimeoutId);
+      this.stopTimeoutId = undefined;
+    }
+
+    this.stopTimeoutId = setTimeout(() => {
+      this.currentSymbol = symbol;
+
+      if (this.isImageUrl(symbol)) {
+        this.ensureImageLoaded(symbol);
+      }
+
+      this.stopSpinning();
+    }, Math.max(0, stopAfterMs));
   }
 
   /**
@@ -177,7 +204,7 @@ export class ReelComponent implements OnInit, OnDestroy {
    * @param symbol - Símbolo final
    */
   private scheduleStop(symbol: string): void {
-    setTimeout(() => {
+    this.stopTimeoutId = setTimeout(() => {
       this.currentSymbol = symbol;
 
       if (this.isImageUrl(symbol)) {
@@ -253,6 +280,11 @@ export class ReelComponent implements OnInit, OnDestroy {
     if (this.spinTimeoutId) {
       clearTimeout(this.spinTimeoutId);
       this.spinTimeoutId = undefined;
+    }
+
+    if (this.stopTimeoutId) {
+      clearTimeout(this.stopTimeoutId);
+      this.stopTimeoutId = undefined;
     }
   }
 

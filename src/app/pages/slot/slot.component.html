@@ -13,7 +13,7 @@
         <!-- Componente en el cuadrado vacío -->
         <app-reel
           class="absolute top-[30%] left-[19%] w-[50%] h-[30%] flex items-center justify-center z-10  bg-white"
-          [duration]="duration"
+          [duration]="getReelDuration(0)"
           [index]="0"
           [targetSymbol]="targetSymbol"
           (stop)="onReelStop(0)"
@@ -26,7 +26,7 @@
         <img src="../../../assets/img/Surtidor_medio_A.webp" alt="Surtidor Medio" class="object-contain h-full w-full z-20" />
         <app-reel
           class="absolute top-[30%] left-[25%] w-[50%] h-[30%] flex items-center justify-center z-10 bg-white"
-          [duration]="duration"
+          [duration]="getReelDuration(1)"
           [index]="1"
           [targetSymbol]="targetSymbol"
           (stop)="onReelStop(1)"
@@ -39,7 +39,7 @@
         <img src="../../../assets/img/Surtidor_derecha_A.webp" alt="Surtidor Derecha" class="object-contain h-full w-full z-20" />
         <app-reel
           class="absolute top-[30%] right-[19%] w-[50%] h-[30%] flex items-center justify-center z-10 bg-white"
-          [duration]="duration"
+          [duration]="getReelDuration(2)"
           [index]="2"
           [targetSymbol]="targetSymbol"
           (stop)="onReelStop(2)"
@@ -65,7 +65,7 @@
     class="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br font-medium rounded-lg px-5 py-2.5 text-center me-2 w-40 text-4xl z-10">
   </button>
 </main>
-<!-- 
+<!--
 <audio id="audio_back" controls hidden>
   <source type="audio/mpeg" src="../../../assets/music/back.mp3">
 </audio> -->

@@ -37,16 +37,22 @@ export class SlotComponent implements OnInit {
 
   private backAudio?: HTMLAudioElement;
   private winAudio?: HTMLAudioElement;
+  private spinStartMs: number = 0;
 
   socketService = inject(SocketService);
 
   islandName: string = '';
-  duration = 3200;
+  baseDuration = 3200;
   winningPrize: string = '';
   showWinningMessage: boolean = false;
   isTestMode: boolean = false;
   isSpinDelayed: boolean = false;
   showIslandPlaying: boolean = true;
+
+  getReelDuration(index: number): number {
+    const offsets = [0, 250, 500];
+    return this.baseDuration + (offsets[index] ?? 0);
+  }
 
   constructor(
     private readonly symbolsService: SymbolsService,
@@ -215,21 +221,36 @@ export class SlotComponent implements OnInit {
         return;
       }
 
-      this.incrementCounterAndSpin();
+      this.startOptimisticSpin();
+      this.incrementCounterAndFinalizeSpin();
     });
   }
 
   /**
    * Incrementa el contador y ejecuta el giro
    */
-  private incrementCounterAndSpin(): void {
+  private startOptimisticSpin(): void {
+    this.spinning.fill(true);
+    this.spinStartMs = performance.now();
+    this.playBackgroundAudio();
+
+    // Arranca el giro inmediato (sin símbolo final) para que no se perciba el lag del backend.
+    this.reels.forEach((reel) => {
+      reel.startSpinningWithoutFinal();
+    });
+  }
+
+  private incrementCounterAndFinalizeSpin(): void {
     this.counterService.incrementCounter(this.stationId).subscribe({
       next: (response) => {
         const globalCounterValue = response.body.globalCounterValue;
-        this.executeSpin(globalCounterValue);
+        this.finalizeSpin(globalCounterValue);
       },
       error: (err) => {
         console.error('Hubo un error al incrementar el contador:', err);
+
+        // Si falla el backend, detenemos el giro para no dejar la UI “colgada”.
+        this.reels.forEach((reel) => reel.stopSpinning());
       }
     });
   }
@@ -238,13 +259,17 @@ export class SlotComponent implements OnInit {
    * Ejecuta el giro de los reels con los símbolos determinados
    * @param globalCounterValue - Valor del contador global
    */
-  private executeSpin(globalCounterValue: number): void {
-    this.spinning.fill(true);
+  private finalizeSpin(globalCounterValue: number): void {
     this.targetSymbol = this.symbolsService.checkTargetSymbol(globalCounterValue);
     const symbols = this.determineSymbols();
 
-    this.playBackgroundAudio();
-    this.startReelsSpinning(symbols);
+    const elapsedMs = Math.max(0, performance.now() - this.spinStartMs);
+
+    this.reels.forEach((reel, index) => {
+      const totalMs = this.getReelDuration(index);
+      const remainingMs = totalMs - elapsedMs;
+      reel.finishSpin(symbols[index], remainingMs);
+    });
   }
 
   /**
