@@ -12,8 +12,22 @@ import { AuthStatus } from '../interfaces';
 export const isAuthenticatedGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  
+
   return checkAuthentication(authService, router);
+};
+
+export const redirectAuthenticatedFromLoginGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  const status = authService.authStatus();
+
+  if (status === AuthStatus.authenticated) {
+    router.navigateByUrl('/panel');
+    return false;
+  }
+
+  return true;
 };
 
 /**
@@ -24,7 +38,7 @@ export const isAuthenticatedGuard: CanActivateFn = (route, state) => {
  */
 function checkAuthentication(authService: AuthService, router: Router): boolean {
   const status = authService.authStatus();
-  
+
   if (status === AuthStatus.authenticated) {
     return true;
   }

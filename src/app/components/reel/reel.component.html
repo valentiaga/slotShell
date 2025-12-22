@@ -1,5 +1,7 @@
-<div [class.spin]="spinning" class="reel h-full w-full">
-  <div class="content" [ngClass]="{'blink': blink}">
+<div
+  class="reel h-full w-full"
+  [ngClass]="{ 'spin': spinning, 'up': spinning && spinDirection === 'up', 'down': spinning && spinDirection === 'down', 'slowing': spinning && isSlowingDown }">
+  <div class="content" [ngClass]="{ 'blink': blink }">
     <!-- Mostrar imagen si es URL -->
     <ng-container *ngIf="isImageUrl(currentSymbol)">
       <!-- Placeholder mientras carga -->
@@ -9,10 +11,10 @@
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
       </div>
-      
+
       <!-- Imagen con lazy loading -->
-      <img 
-        [src]="getOptimizedImageUrl(currentSymbol)" 
+      <img
+        [src]="getOptimizedImageUrl(currentSymbol)"
         [alt]="currentSymbol"
         loading="lazy"
         (load)="imageLoaded = true"
@@ -20,9 +22,9 @@
         [class.hidden]="!imageLoaded"
         class="symbol-image w-full h-full object-contain" />
     </ng-container>
-    
+
     <!-- Mostrar texto si no es URL -->
-    <div *ngIf="!isImageUrl(currentSymbol)" class="text-4xl font-bold"> 
+    <div *ngIf="!isImageUrl(currentSymbol)" class="text-4xl font-bold">
       {{ currentSymbol }}
     </div>
   </div>

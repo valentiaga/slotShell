@@ -1,5 +1,5 @@
 import { Component, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
-import { NgClass, NgIf, NgFor } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DiasCellRendererComponent } from '../dias-cell-renderer/dias-cell-renderer.component';
 import { ImagesService } from '../../services/images/images.service';
@@ -12,7 +12,7 @@ import { DeleteImageModalComponent } from './delete-image-modal/delete-image-mod
 @Component({
   selector: 'app-modal',
   standalone: true,
-  imports: [NgIf, NgClass, NgFor, FormsModule, DiasCellRendererComponent, PrizeImageSelectorComponent, DeleteImageModalComponent],
+  imports: [NgIf, NgClass, FormsModule, DiasCellRendererComponent, PrizeImageSelectorComponent, DeleteImageModalComponent],
   templateUrl: './modal.component.html',
   styleUrl: './modal.component.css'
 })

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, OnDestroy, OnInit } from '@angular/core';
 import { SymbolsService } from '../../services/symbols.service';
 import { CloudinaryService } from '../../services/cloudinary/cloudinary.service';
 
@@ -13,7 +13,7 @@ import { CloudinaryService } from '../../services/cloudinary/cloudinary.service'
     styleUrl: './reel.component.css',
     changeDetection: ChangeDetectionStrategy.Default,
 })
-export class ReelComponent implements OnInit {
+export class ReelComponent implements OnInit, OnDestroy {
   @Input() duration: number = 1000;
   @Input() targetSymbol?: string | null;
   @Output() stop = new EventEmitter<void>();
@@ -21,9 +21,14 @@ export class ReelComponent implements OnInit {
 
   currentSymbol: string = this.symbolsService.getRandomSymbol();
   spinning: boolean = false;
-  intervalId?: any;
+  private spinTimeoutId?: ReturnType<typeof setTimeout>;
+  private spinStartMs: number = 0;
   blink: boolean = false;
   imageLoaded: boolean = false;
+  spinDirection: 'up' | 'down' = 'up';
+  isSlowingDown: boolean = false;
+  private finalSymbol?: string;
+  private didLockFinalSymbol: boolean = false;
 
   constructor(
     private readonly symbolsService: SymbolsService,
@@ -38,6 +43,10 @@ export class ReelComponent implements OnInit {
     this.preloadCurrentImage();
   }
 
+  ngOnDestroy(): void {
+    this.clearSpinTimers();
+  }
+
   /**
    * Pre-carga la imagen del símbolo actual
    */
@@ -47,7 +56,7 @@ export class ReelComponent implements OnInit {
     }
 
     const cached = this.cloudinaryService.getFromCache(this.currentSymbol);
-    
+
     if (cached) {
       this.imageLoaded = true;
     } else {
@@ -60,6 +69,8 @@ export class ReelComponent implements OnInit {
    * @param symbol - Símbolo objetivo final
    */
   startSpinning(symbol: string): void {
+    this.finalSymbol = symbol;
+    this.didLockFinalSymbol = false;
     this.initializeSpinning();
     this.startSpinAnimation();
     this.scheduleStop(symbol);
@@ -72,33 +83,81 @@ export class ReelComponent implements OnInit {
     this.spinning = true;
     this.blink = false;
     this.imageLoaded = false;
+
+    // Alterna la dirección entre reels para un efecto visual más dinámico.
+    this.spinDirection = this.index % 2 === 0 ? 'up' : 'down';
   }
 
   /**
    * Inicia la animación de giro
    */
   private startSpinAnimation(): void {
-    let intervalTime = 100;
-    let speedUp = true;
-  
-    this.intervalId = setInterval(() => {
-      this.updateSymbol();
-      
-      if (speedUp && intervalTime > 50) {
-        intervalTime -= 10;
+    this.clearSpinTimers();
+    this.spinStartMs = performance.now();
+    this.isSlowingDown = false;
+    this.scheduleNextTick();
+  }
+
+  private scheduleNextTick(): void {
+    if (!this.spinning) {
+      return;
+    }
+
+    const now = performance.now();
+    const elapsed = now - this.spinStartMs;
+    const t = this.duration > 0 ? Math.min(1, Math.max(0, elapsed / this.duration)) : 1;
+    this.isSlowingDown = t >= 0.6;
+
+    if (!this.didLockFinalSymbol && this.finalSymbol && t >= 0.85) {
+      this.didLockFinalSymbol = true;
+      this.currentSymbol = this.finalSymbol;
+
+      if (this.isImageUrl(this.finalSymbol)) {
+        this.cloudinaryService.preloadImages([this.finalSymbol]);
+        const cached = this.cloudinaryService.getFromCache(this.finalSymbol);
+        if (cached) {
+          this.imageLoaded = true;
+        }
       }
-  
-      if (!speedUp && intervalTime < 150) {
-        intervalTime += 30;
+    }
+
+    const delayMs = this.computeTickDelayMs(t);
+
+    this.spinTimeoutId = setTimeout(() => {
+      if (!this.didLockFinalSymbol) {
+        this.updateSymbol();
       }
-  
-      if (intervalTime <= 50) {
-        speedUp = false;
-      }
-  
-      clearInterval(this.intervalId);
-      this.intervalId = setInterval(() => this.updateSymbol(), intervalTime);
-    }, intervalTime);
+      this.scheduleNextTick();
+    }, delayMs);
+  }
+
+  private computeTickDelayMs(t: number): number {
+    // t: 0..1
+    // Acelera rápido al principio (baja el delay), luego desacelera progresivamente.
+    const startDelay = 140;
+    const minDelay = 20;
+    const endDelay = 300;
+    const accelPortion = 0.15;
+
+    if (t <= accelPortion) {
+      const p = t / accelPortion;
+      return this.lerp(startDelay, minDelay, this.easeOutQuad(p));
+    }
+
+    const p = (t - accelPortion) / (1 - accelPortion);
+    return this.lerp(minDelay, endDelay, this.easeOutCubic(p));
+  }
+
+  private lerp(a: number, b: number, t: number): number {
+    return a + (b - a) * t;
+  }
+
+  private easeOutQuad(t: number): number {
+    return 1 - (1 - t) * (1 - t);
+  }
+
+  private easeOutCubic(t: number): number {
+    return 1 - Math.pow(1 - t, 3);
   }
 
   /**
@@ -107,7 +166,7 @@ export class ReelComponent implements OnInit {
   private updateSymbol(): void {
     const newSymbol = this.symbolsService.getRandomSymbol();
     this.currentSymbol = newSymbol;
-    
+
     if (this.isImageUrl(newSymbol)) {
       this.cloudinaryService.preloadImages([newSymbol]);
     }
@@ -120,11 +179,11 @@ export class ReelComponent implements OnInit {
   private scheduleStop(symbol: string): void {
     setTimeout(() => {
       this.currentSymbol = symbol;
-      
+
       if (this.isImageUrl(symbol)) {
         this.ensureImageLoaded(symbol);
       }
-      
+
       this.stopSpinning();
     }, this.duration);
   }
@@ -135,7 +194,7 @@ export class ReelComponent implements OnInit {
    */
   private ensureImageLoaded(imageUrl: string): void {
     const cached = this.cloudinaryService.getFromCache(imageUrl);
-    
+
     if (cached) {
       this.imageLoaded = true;
     } else {
@@ -186,8 +245,15 @@ export class ReelComponent implements OnInit {
    * Limpia el intervalo de giro
    */
   private clearSpinInterval(): void {
-    clearInterval(this.intervalId);
+    this.clearSpinTimers();
     this.spinning = false;
+  }
+
+  private clearSpinTimers(): void {
+    if (this.spinTimeoutId) {
+      clearTimeout(this.spinTimeoutId);
+      this.spinTimeoutId = undefined;
+    }
   }
 
   /**
@@ -195,7 +261,7 @@ export class ReelComponent implements OnInit {
    */
   private applyStopAnimation(): void {
     const reelElement = document.querySelectorAll('.reel .content')[this.index];
-    
+
     if (reelElement) {
       reelElement.classList.add('stop-shake');
       setTimeout(() => reelElement.classList.remove('stop-shake'), 500);

@@ -26,7 +26,7 @@ import { PremiosService } from '../../services/premios/premios.service';
 })
 export class SlotComponent implements OnInit {
   @ViewChildren(ReelComponent) reels!: QueryList<ReelComponent>;
-  
+
   stationId!: number;
   activePrizes: Premio[] = [];
   displayPrizes: string[] = [];
@@ -34,14 +34,14 @@ export class SlotComponent implements OnInit {
   spinning: boolean[] = new Array<boolean>(3).fill(false);
   totalSpinCount: number = 0;
   targetSymbol?: string | null;
-  
+
   private backAudio?: HTMLAudioElement;
   private winAudio?: HTMLAudioElement;
-  
+
   socketService = inject(SocketService);
-  
+
   islandName: string = '';
-  duration = 2400;
+  duration = 3200;
   winningPrize: string = '';
   showWinningMessage: boolean = false;
   isTestMode: boolean = false;
@@ -49,9 +49,9 @@ export class SlotComponent implements OnInit {
   showIslandPlaying: boolean = true;
 
   constructor(
-    private readonly symbolsService: SymbolsService, 
-    private readonly counterService: CounterService, 
-    private readonly route: ActivatedRoute, 
+    private readonly symbolsService: SymbolsService,
+    private readonly counterService: CounterService,
+    private readonly route: ActivatedRoute,
     private readonly confettiService: ConfettiService,
     private readonly premiosService: PremiosService
   ) { }
@@ -124,7 +124,7 @@ export class SlotComponent implements OnInit {
       2: 'Matheu',
       3: 'Roca'
     };
-    
+
     const stationName = stationNames[this.stationId] || 'no válida';
     console.log(`Estación ${stationName} seleccionada`);
   }
@@ -171,7 +171,7 @@ export class SlotComponent implements OnInit {
       19: 'Isla 5',
       26: 'Isla 6'
     };
-    
+
     this.islandName = islandMap[pinData] || this.islandName;
   }
 
@@ -299,7 +299,7 @@ export class SlotComponent implements OnInit {
    */
   onReelStop(index: number): void {
     this.spinning[index] = false;
-    
+
     if (!this.spinning.includes(true)) {
       this.handleAllReelsStopped();
     }
@@ -310,7 +310,7 @@ export class SlotComponent implements OnInit {
    */
   private handleAllReelsStopped(): void {
     this.backAudio?.pause();
-    
+
     if (this.checkForMatch()) {
       this.handleWin();
     }
@@ -332,7 +332,7 @@ export class SlotComponent implements OnInit {
   private handleWin(): void {
     this.winAudio?.play();
 
-    const symbol = this.reels.first.currentSymbol;  
+    const symbol = this.reels.first.currentSymbol;
     this.showPrizeMessage(symbol);
     this.activateReelBlink();
     this.confettiService.launchConfetti();
@@ -364,7 +364,7 @@ export class SlotComponent implements OnInit {
    */
   private showPrizeMessage(symbol: any): void {
     const prize = this.symbolsService.getPrizeBySymbol(symbol);
-    
+
     if (prize) {
       const { prizeDisplay, prizeValue } = this.getPrizeDisplayInfo(prize);
       this.winningPrize = `🎉 ¡Has ganado ${prizeDisplay.toLowerCase()} en ${this.islandName}! 🎉`;

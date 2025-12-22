@@ -16,6 +16,7 @@
   /* font-family: 'Anton'; */
   font-family: 'Monomaniac One';
   color: rgb(70, 70, 70);
+  will-change: transform;
 }
 
 .stop-shake {
@@ -29,12 +30,20 @@
   object-fit: contain;
 }
 
-.spin.up {
-  animation: spinEffect 0.2s infinite linear;
+.reel.spin.up .content {
+  animation: spinEffect 0.12s infinite linear;
 }
 
-.spin.down {
-  animation: spinEffectDown 0.3s infinite linear;
+.reel.spin.down .content {
+  animation: spinEffectDown 0.14s infinite linear;
+}
+
+.reel.spin.slowing.up .content {
+  animation-duration: 0.28s;
+}
+
+.reel.spin.slowing.down .content {
+  animation-duration: 0.32s;
 }
 
 @keyframes spinEffect {
@@ -51,7 +60,7 @@
     transform: rotateX(-15deg) translateY(-50%);
   }
   100% {
-    transform: rotateX(-20deg) translateY(-100%);
+    transform: rotateX(-20deg) translateY(-80%);
   }
 }
 
