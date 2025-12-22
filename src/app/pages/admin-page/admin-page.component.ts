@@ -49,7 +49,7 @@ export class AdminPageComponent implements OnInit {
   displayFilterRow = false;
   showModal: boolean = false;
   themeClass = 'ag-theme-quartz-dark';
-  
+
   private gridApi: GridApi<any> | undefined;
   rowData: Premio[] = [];
   counterSignal = this.counterService.getCounter();
@@ -147,7 +147,7 @@ export class AdminPageComponent implements OnInit {
       cellRendererParams: {
         onDaysChanged: (newDays: string, params: any) => {
           params.node.setDataValue('active_days', newDays);
-          
+
           this.onCellValueChanged({
             data: { ...params.data, active_days: newDays },
             colDef: params.colDef,
@@ -187,7 +187,6 @@ export class AdminPageComponent implements OnInit {
       sortable: false,
       editable: false,
     }
-    
   ];
 
   constructor(
@@ -291,11 +290,11 @@ export class AdminPageComponent implements OnInit {
    */
   private prepareDataForUpdate(event: CellValueChangedEvent): any {
     const dataToSend = { ...event.data };
-    
+
     if (event.colDef.field === 'amount') {
       this.handleAmountFieldChange(dataToSend, event.newValue);
     }
-    
+
     return dataToSend;
   }
 
@@ -322,9 +321,9 @@ export class AdminPageComponent implements OnInit {
   private isNumericValue(value: any): boolean {
     const trimmedValue = value.toString().trim();
     const numericValue = parseFloat(trimmedValue);
-    
-    return !isNaN(numericValue) && 
-           isFinite(numericValue) && 
+
+    return !isNaN(numericValue) &&
+           isFinite(numericValue) &&
            numericValue.toString() === trimmedValue;
   }
 
@@ -372,8 +371,9 @@ export class AdminPageComponent implements OnInit {
    */
   private deletePrizeFromServer(rowId: number, rowNode: any): void {
     this.premiosService.deleteRow(rowId).subscribe({
-      next: () => {
-        this.gridApi?.applyTransaction({ remove: [rowNode.data] });
+      next: (data) => {
+        this.rowData = data.body;
+        this.gridApi?.setGridOption('rowData', data.body);
         this.premiosService.clearCache();
         this.toastService.showToast('success', 'Premio eliminado con éxito.');
       },
@@ -382,7 +382,7 @@ export class AdminPageComponent implements OnInit {
         console.error('Error al eliminar el premio:', error);
       }
     });
-  }  
+  }
 
   /**
    * Cierra el modal de agregar/editar premio
@@ -396,14 +396,14 @@ export class AdminPageComponent implements OnInit {
    */
   redirect(): void {
     const idAuth = localStorage.getItem('idAuth');
-    
+
     if (!idAuth) {
       console.warn('idAuth no encontrado en localStorage');
       return;
     }
 
     const route = this.getRouteByStationId(idAuth);
-    
+
     if (route) {
       this.router.navigate([route]);
     } else {
@@ -422,7 +422,7 @@ export class AdminPageComponent implements OnInit {
       '2': '/matheu',
       '3': '/roca'
     };
-    
+
     return routes[stationId] || null;
   }
 }

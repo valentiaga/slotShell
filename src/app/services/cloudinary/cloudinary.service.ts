@@ -17,7 +17,7 @@ declare global {
 export class CloudinaryService {
   private readonly baseUrl = environments.BASE_URL;
   private widget: any;
-  
+
   // Cache de imágenes
   private imageCache = new Map<string, HTMLImageElement>();
   private newImagesSubject = new BehaviorSubject<boolean>(false);
@@ -44,114 +44,164 @@ export class CloudinaryService {
   }
 
   // Obtener firma del backend para upload seguro
-  private getSignature(): Observable<any> {
-    return this.http.post(`${this.baseUrl}/cloudinary/signature`, {});
+  // Nota: para uploads con cropping el widget agrega params (ej: custom_coordinates) y
+  // la firma debe generarse con EXACTAMENTE los params_to_sign que entrega el widget.
+  private getSignature(paramsToSign?: Record<string, any>): Observable<any> {
+    const body = paramsToSign ? { params_to_sign: paramsToSign } : {};
+    return this.http.post(`${this.baseUrl}/cloudinary/signature`, body);
   }
 
   // Abrir widget de Cloudinary con validaciones
-  async openUploadWidget(onSuccess: (result: any) => void, onError?: (error: any) => void) {
+  async openUploadWidget(
+    onSuccess: (result: any) => void,
+    onError?: (error: any) => void,
+    onClose?: () => void
+  ) {
     await this.loadCloudinaryWidget();
 
     const signatureResponse = await this.getSignature().toPromise();
 
-    this.widget = window.cloudinary.createUploadWidget(
-      {
-        cloudName: signatureResponse.cloudname,
-        apiKey: signatureResponse.apikey,
-        uploadSignature: signatureResponse.signature,
-        uploadSignatureTimestamp: signatureResponse.timestamp,
-        folder: 'prizes', // Debe coincidir con el backend
-        
-        // Restricciones de archivo
-        sources: ['local'], // Solo subir desde computadora
-        multiple: false, // Solo una imagen a la vez
-        maxFiles: 1,
-        maxFileSize: 10000000, // 10MB máximo
-        clientAllowedFormats: ['webp', 'png'], // Solo WebP y PNG
-        
-        // Validación de dimensiones cuadradas
-        cropping: true,
-        croppingAspectRatio: 1, // Forzar aspecto 1:1 (cuadrado)
-        croppingDefaultSelectionRatio: 1,
-        croppingShowDimensions: true,
-        
-        // UI personalizada
-        styles: {
-          palette: {
-            window: '#FFFFFF',
-            windowBorder: '#90A0B3',
-            tabIcon: '#000000',
-            menuIcons: '#5A616A',
-            textDark: '#000000',
-            textLight: '#FFFFFF',
-            link: '#0078FF',
-            action: '#FF620C',
-            inactiveTabIcon: '#0E2F5A',
-            error: '#F44235',
-            inProgress: '#0078FF',
-            complete: '#20B832',
-            sourceBg: '#E4EBF1'
-          },
-          fonts: {
-            default: null,
-            "'Poppins', sans-serif": {
-              url: 'https://fonts.googleapis.com/css?family=Poppins',
-              active: true
-            }
-          }
-        },
-        text: {
-          es: {
-            or: 'o',
-            back: 'Atrás',
-            advanced: 'Avanzado',
-            close: 'Cerrar',
-            no_results: 'Sin resultados',
-            search_placeholder: 'Buscar archivos',
-            about_uw: 'Acerca del widget',
-            menu: {
-              files: 'Mis archivos',
-              web: 'Dirección web',
-              camera: 'Cámara'
-            },
-            local: {
-              browse: 'Explorar',
-              dd_title_single: 'Arrastra una imagen aquí',
-              dd_title_multi: 'Arrastra imágenes aquí',
-              drop_title_single: 'Suelta para subir',
-              drop_title_multiple: 'Suelta para subir'
-            },
-            crop: {
-              title: 'Recortar',
-              crop_btn: 'Recortar y continuar',
-              skip_btn: 'Saltar',
-              reset_btn: 'Reiniciar',
-              close_prompt: '¿Cerrar el recorte cancelará la subida?'
-            }
-          }
-        },
-        language: 'es'
-      },
-      (error: any, result: any) => {
-        if (error) {
-          console.error('Error en upload:', error);
-          if (onError) onError(error);
-          return;
-        }
+    const state = {
+      didSucceed: false,
+      didCloseCallback: false
+    };
 
-        if (result.event === 'success') {
-          console.log('Upload exitoso:', result.info);
-          
-          // Marcar que hay nuevas imágenes
-          this.newImagesSubject.next(true);
-          
-          // Callback de éxito
-          onSuccess(result.info);
-        }
-      }
+    const options = this.buildUploadWidgetOptions(signatureResponse, onError);
+
+    this.widget = window.cloudinary.createUploadWidget(
+      options,
+      (error: any, result: any) => this.handleUploadWidgetResult(error, result, state, onSuccess, onError, onClose)
     );
 
     this.widget.open();
+  }
+
+  private buildUploadWidgetOptions(signatureResponse: any, onError?: (error: any) => void): any {
+    return {
+      cloudName: signatureResponse.cloudname,
+      apiKey: signatureResponse.apikey,
+      uploadSignature: (callback: (signature: string) => void, paramsToSign: Record<string, any>) => {
+        console.log('[Cloudinary UW] params_to_sign:', paramsToSign);
+        this.getSignature(paramsToSign).subscribe({
+          next: (resp) => {
+            callback(resp.signature);
+          },
+          error: (err) => {
+            console.error('Error obteniendo firma:', err);
+            if (onError) onError(err);
+          }
+        });
+      },
+      folder: 'prizes',
+      sources: ['local'],
+      multiple: false,
+      maxFiles: 1,
+      maxFileSize: 10000000,
+      clientAllowedFormats: ['webp', 'png'],
+      cropping: true,
+      croppingAspectRatio: 1,
+      croppingDefaultSelectionRatio: 1,
+      croppingShowDimensions: true,
+      styles: {
+        palette: {
+          window: '#FFFFFF',
+          windowBorder: '#90A0B3',
+          tabIcon: '#000000',
+          menuIcons: '#5A616A',
+          textDark: '#000000',
+          textLight: '#FFFFFF',
+          link: '#0078FF',
+          action: '#FF620C',
+          inactiveTabIcon: '#0E2F5A',
+          error: '#F44235',
+          inProgress: '#0078FF',
+          complete: '#20B832',
+          sourceBg: '#E4EBF1'
+        },
+        fonts: {
+          default: null,
+          "'Poppins', sans-serif": {
+            url: 'https://fonts.googleapis.com/css?family=Poppins',
+            active: true
+          }
+        }
+      },
+      text: {
+        es: {
+          or: 'o',
+          back: 'Atrás',
+          advanced: 'Avanzado',
+          close: 'Cerrar',
+          no_results: 'Sin resultados',
+          search_placeholder: 'Buscar archivos',
+          about_uw: 'Acerca del widget',
+          menu: {
+            files: 'Mis archivos',
+            web: 'Dirección web',
+            camera: 'Cámara'
+          },
+          local: {
+            browse: 'Explorar',
+            dd_title_single: 'Arrastra una imagen aquí',
+            dd_title_multi: 'Arrastra imágenes aquí',
+            drop_title_single: 'Suelta para subir',
+            drop_title_multiple: 'Suelta para subir'
+          },
+          crop: {
+            title: 'Recortar',
+            crop_btn: 'Recortar y continuar',
+            skip_btn: 'Saltar',
+            reset_btn: 'Reiniciar',
+            close_prompt: '¿Cerrar el recorte cancelará la subida?'
+          }
+        }
+      },
+      language: 'es'
+    };
+  }
+
+  private handleUploadWidgetResult(
+    error: any,
+    result: any,
+    state: { didSucceed: boolean; didCloseCallback: boolean },
+    onSuccess: (result: any) => void,
+    onError?: (error: any) => void,
+    onClose?: () => void
+  ): void {
+    if (error) {
+      console.error('Error en upload:', error);
+      if (onError) onError(error);
+      return;
+    }
+
+    if (this.isWidgetCloseEvent(result)) {
+      this.maybeInvokeOnClose(state, onClose);
+      return;
+    }
+
+    if (result?.event === 'success') {
+      state.didSucceed = true;
+      console.log('Upload exitoso:', result.info);
+      this.newImagesSubject.next(true);
+      onSuccess(result.info);
+    }
+  }
+
+  private isWidgetCloseEvent(result: any): boolean {
+    const isHiddenDisplayChange =
+      result?.event === 'display-changed' &&
+      (result?.info === 'hidden' || result?.info?.display === 'hidden' || result?.info?.state === 'hidden');
+
+    return result?.event === 'close' || result?.event === 'abort' || result?.event === 'batch-cancelled' || isHiddenDisplayChange;
+  }
+
+  private maybeInvokeOnClose(state: { didSucceed: boolean; didCloseCallback: boolean }, onClose?: () => void): void {
+    if (state.didSucceed || state.didCloseCallback || !onClose) {
+      return;
+    }
+
+    state.didCloseCallback = true;
+    onClose();
   }
 
   // Pre-cargar imágenes para caché (lazy loading inteligente)
@@ -197,10 +247,9 @@ export class CloudinaryService {
         const cloudNameMatch = url.match(/cloudinary\.com\/([^\/]+)\//);
         const cloudName = cloudNameMatch ? cloudNameMatch[1] : '';
         const publicIdPart = urlParts[1];
-        
         // Remover transformaciones existentes y extensión
         const publicId = publicIdPart.replace(/^[^\/]+\//, '').replace(/\.[^.]+$/, '');
-        
+
         // Construir URL optimizada
         return `https://res.cloudinary.com/${cloudName}/image/upload/w_${width},h_${height},c_fill,f_auto,q_auto/${publicId}`;
       }
