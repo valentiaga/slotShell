@@ -60,7 +60,7 @@ export class ImagesService {
   }
 
   saveImage(imageData: Image): Observable<any> {
-    return this.http.post(`${this.baseUrl}/images`, imageData).pipe(
+    return this.util.buildRequest<any>('post', `${this.baseUrl}/images`, imageData).pipe(
       tap(() => {
         this.clearCache(); // Invalidar caché al agregar nueva imagen
       })
