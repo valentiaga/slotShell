@@ -6,7 +6,7 @@ import { io, Socket } from 'socket.io-client';
 })
 export class SocketService {
   private readonly socket: Socket;
-  private readonly SERVER_URL = 'https://nsw-boring-penalty-cap.trycloudflare.com';
+  private readonly SERVER_URL = 'http://35.184.191.101';
 
   constructor() {
     this.socket = io(this.SERVER_URL);
